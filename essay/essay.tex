@@ -1,0 +1,63 @@
+% latex template
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[margin=1in]{geometry}
+\usepackage{caption} % figure captioning
+\usepackage{amsmath} % equation tools
+\usepackage{amssymb} % math symbols
+\usepackage{mathtools} % math rendering improvements
+%\usepackage{siunitx} % standard units
+\usepackage{graphicx} % add images
+%\usepackage{wrapfig} % position images
+\usepackage{float} % position images pt.2
+%\usepackage[makeroom]{cancel} % cross out text
+%\usepackage[version=4]{mhchem} % chemical equations
+%\usepackage{multicol} % multiple columns
+%\usepackage{pgfplots} % built in plotter
+%\pgfplotsset{width=10cm,compat=1.9} % plotter settings
+\usepackage{hyperref} % table of contents links
+\usepackage{indentfirst} % indent first paragraph after section
+
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+}
+
+\renewcommand{\baselinestretch}{1.5} % line spacing
+\newcommand{\fline}{\par\noindent\rule{\textwidth}{0.1pt}} % horizontal line (wide)
+
+\title{EE TITLE}
+\author{Bryan Deng}
+
+\begin{document}
+
+\maketitle
+\newpage
+\tableofcontents
+\newpage
+
+\section{Background Information}
+
+\subsection{Machine Learning and its Applications}
+
+Machine learning is a branch of artificial intelligence that uses large datasets and algorithms to mimic the way humans learn and improve accuracy over time \cite{whatisml}. Since its debut in 1952, it has been steadily gaining popularity and recognition for its abilities in recognizing patterns and continuous learning.
+
+\section{Experimental Methodology}
+
+\section{Data Analysis}
+
+\section{Error Analysis}
+
+\section{Conclusion}
+
+\section{Appendix}
+
+\bibliographystyle{plain}
+\bibliography{refs}
+
+\end{document}
+
