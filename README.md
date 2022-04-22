@@ -4,6 +4,7 @@
 
 **TODO**:
 
-- compare edt with other algorithms on small dataset (iris)
+- compare EDT with other algorithms on small dataset (iris)
 - ... on medium dataset (titanic?)
 - ... on large dataset (UC Irvine Adult)
+- balance the binary trees
