@@ -1,10 +1,25 @@
 import os
+import pickle as pkl
 
 import pandas as pd
 
 DIR = os.path.dirname(os.path.realpath(__file__))
 
 
+# data cache decorator
+def data_cache(func):
+    def wrapper(*args, **kwargs):
+        if not os.path.isfile(f"{DIR}/cache/{func.__name__}.pkl"):
+            data = func(*args, **kwargs)
+            pkl.dump(data, open(f"{DIR}/cache/{func.__name__}.pkl", "wb"))
+        else:
+            print(f"Loading {func.__name__} from cache")
+            data = pkl.load(open(f"{DIR}/cache/{func.__name__}.pkl", "rb"))
+        return data
+    return wrapper
+
+
+@data_cache
 def load_titanic():
     train = pd.read_csv(f"{DIR}/titanic/train.csv")
     test = pd.read_csv(f"{DIR}/titanic/test.csv")
@@ -36,6 +51,7 @@ def load_titanic():
     return (train_X, train_Y), (test, None)
 
 
+@data_cache
 def load_iris():
     train = pd.read_csv(f"{DIR}/iris/train.csv")
 
