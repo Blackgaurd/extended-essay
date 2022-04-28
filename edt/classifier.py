@@ -8,12 +8,14 @@ from collections import deque
 import copy
 import random
 import statistics
-from typing import List, Optional, Tuple
+from typing import Any, Callable, List, Optional, Tuple
 
 import numpy as np
 import pygraphviz as pgv
 
 data_loaded = False
+
+random.seed(2)
 
 
 def load_features(trainX: np.ndarray, trainY: np.ndarray) -> None:
@@ -167,10 +169,19 @@ class FitnessEvaluator:
     def __init__(self, a1: float, a2: float) -> None:
         self.a1 = a1
         self.a2 = a2
+        self.X: Optional[np.ndarray] = None
+        self.Y: Optional[np.ndarray] = None
 
-    def __call__(self, individual: DecisionTree, X: np.ndarray, Y: np.ndarray) -> float:
-        predictions = np.array(individual.classify_many(X), dtype=int)
-        f1 = np.sum(predictions == Y) / len(Y)
+    def _init(self, X: np.ndarray, Y: np.ndarray) -> None:
+        self.X = X
+        self.Y = Y
+
+    def accuracy(self, individual: DecisionTree) -> float:
+        predictions = np.array(individual.classify_many(self.X), dtype=int)
+        return np.sum(predictions == self.Y) / len(self.Y)
+
+    def __call__(self, individual: DecisionTree) -> float:
+        f1 = self.accuracy(individual)
         # TODO: update f2 to non-linear function that intersects y=0 at x=max_depth
         f2 = 1 - individual.depth / individual.max_depth
         return self.a1 * f1 + self.a2 * f2
@@ -328,17 +339,31 @@ class EDTClassifier:
         verbose: bool = False,
     ) -> None:
         fit_eval = self.fitness_eval
+        fit_eval._init(X, Y)
 
         n = len(self.population)
 
         for gen in range(1, generations + 1):
-            if verbose:
+            fitnesses = [fit_eval(tree) for tree in self.population]
+
+            if verbose and gen % verbose == 0:
+                accuracies = [fit_eval.accuracy(tree) for tree in self.population]
+                tree_gen = tuple(tree.depth for tree in self.population)
+                max_depth = max(tree_gen)
+                min_depth = min(tree_gen)
+                average_depth = statistics.mean(tree_gen)
+                median_depth = statistics.median(tree_gen)
+                std_depth = statistics.stdev(tree_gen)
                 print(f"Generation {gen}/{generations}")
-
-            fitnesses = [fit_eval(tree, X, Y) for tree in self.population]
-
-            if verbose:
                 print(f"Average fitness: {sum(fitnesses) / len(fitnesses)}")
+                print(f"Average accuracy: {sum(accuracies) / len(accuracies)}")
+                print("Tree depths:")
+                print(f"- max    : {max_depth}")
+                print(f"- min    : {min_depth}")
+                print(f"- average: {average_depth:.2f}")
+                print(f"- median : {median_depth:.2f}")
+                print(f"- std    : {std_depth:.2f}")
+                print()
 
             new_pop = []
 
@@ -363,11 +388,8 @@ class EDTClassifier:
             # TODO: delete old gen if this takes too much memory
             self.population = new_pop
 
-            if verbose:
-                print()
-
         # sort by fitness
-        fitnesses = [fit_eval(tree, X, Y) for tree in self.population]
+        fitnesses = [fit_eval(tree) for tree in self.population]
         fp = sorted(zip(fitnesses, self.population), key=lambda x: x[0], reverse=True)
         self.population = [fp[i][1] for i in range(n)]
 
