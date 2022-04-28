@@ -1,3 +1,9 @@
+# todo list:
+# update nodes to include left and right child indices
+# add function to balance tree
+# update fitness function to take into account depth
+# - punish trees with depth > max depth
+
 from collections import deque
 import copy
 import random
@@ -29,6 +35,7 @@ class Node:
         self.split_val = split_val
         self.feature = feature
         self.label = label
+        self.depth = 0
 
     @classmethod
     def leaf(cls, label: int):
@@ -51,7 +58,6 @@ class DecisionTree:
         l = 2 ** (max_depth + 1)
 
         self.nodes = [None for _ in range(l)]
-        self.depth_l = [0 for _ in range(l)]  # TODO: store node depth in node class
 
         # root has depth 0
         root_feature = random.choice(features)
@@ -72,7 +78,7 @@ class DecisionTree:
 
             # loop twice for left and right child
             for _ in range(2):
-                if cur * 4 < 2 ** (max_depth + 1) and split_p <= random.random():
+                if ret.nodes[cur].depth + 2 <= max_depth and random.random() <= split_p:
                     next_pos = ret.add_node(cur, "split")
                     q.append(next_pos)
                 else:
@@ -89,7 +95,11 @@ class DecisionTree:
 
         if node_type == "leaf":
             if next_pos % 2 == 1 and self.nodes[next_pos - 1].is_leaf():
-                new_node = Node.leaf(random.choice([i for i in labels if i != self.nodes[next_pos - 1].label]))
+                new_node = Node.leaf(
+                    random.choice(
+                        [i for i in labels if i != self.nodes[next_pos - 1].label]
+                    )
+                )
             else:
                 new_node = Node.leaf(random.choice(labels))
         elif node_type == "split":
@@ -97,8 +107,8 @@ class DecisionTree:
             new_node = Node.split(feature, random.choice(feature_vals[feature]))
 
         self.nodes[next_pos] = new_node
-        self.depth_l[next_pos] = self.depth_l[node_ind] + 1
-        self.depth = max(self.depth, self.depth_l[next_pos])
+        self.nodes[next_pos].depth = self.nodes[node_ind].depth + 1
+        self.depth = max(self.depth, self.nodes[next_pos].depth)
         return next_pos
 
     def extend_nodes(self):
