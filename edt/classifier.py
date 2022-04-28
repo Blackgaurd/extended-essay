@@ -11,6 +11,7 @@ import statistics
 from typing import List
 
 import numpy as np
+import pygraphviz as pgv
 
 data_loaded = False
 
@@ -45,6 +46,11 @@ class Node:
 
     def is_leaf(self):
         return self.label is not None
+
+    def __str__(self):
+        if self.is_leaf():
+            return f"Label: {self.label}"
+        return f"Feature: {self.feature}, Split: {self.split_val}"
 
 
 class DecisionTree:
@@ -130,8 +136,29 @@ class DecisionTree:
         predictions = np.array(self.classify_many(X), dtype=int)
         return np.mean(predictions == Y)
 
-    def visualize(self):
-        raise NotImplementedError("ok")
+    def visualize(self, filename: str):
+        g = pgv.AGraph(directed=True)
+        g.node_attr["shape"] = "box"
+        for i, node in enumerate(self.nodes):
+            if node is None:
+                continue
+            g.add_node(i, label=str(node))
+        q = deque([1])
+        while q:
+            cur = q.popleft()
+            if self.nodes[cur].is_leaf():
+                continue
+            g.add_edge(cur, cur * 2)
+            g.add_edge(cur, cur * 2 + 1)
+            q.append(cur * 2)
+            q.append(cur * 2 + 1)
+        g.layout(prog="dot")
+        if filename.endswith(".png"):
+            g.draw(filename)
+        elif filename.endswith(".dot"):
+            g.write(filename)
+        else:
+            raise ValueError("Unsupported file type")
 
 
 class FitnessEvaluator:
@@ -253,6 +280,7 @@ def crossover_v2(p1: DecisionTree, p2: DecisionTree):
 
 
 def mutate(tree: DecisionTree):
+    # TODO: make sure 2 child leaf nodes stay different
     valid = [i for i in range(len(tree.nodes)) if tree.nodes[i] is not None]
     ind = random.choice(valid)
     if tree.nodes[ind].label is None:

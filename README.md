@@ -8,3 +8,10 @@
 - ... on medium dataset (titanic?)
 - ... on large dataset (UC Irvine Adult)
 - balance the binary trees
+
+## Installation
+
+```bash
+sudo apt-get install graphviz graphviz-dev
+pip install -r requirements.txt
+```
