@@ -8,7 +8,7 @@ from collections import deque
 import copy
 import random
 import statistics
-from typing import List
+from typing import List, Tuple
 
 import numpy as np
 import pygraphviz as pgv
@@ -16,7 +16,7 @@ import pygraphviz as pgv
 data_loaded = False
 
 
-def load_features(trainX: np.ndarray, trainY: np.ndarray):
+def load_features(trainX: np.ndarray, trainY: np.ndarray) -> None:
     global features, feature_vals, labels, data_loaded
 
     # features and feature values
@@ -30,7 +30,7 @@ def load_features(trainX: np.ndarray, trainY: np.ndarray):
 
 
 class Node:
-    def __init__(self, split_val: float = None, feature: int = None, label: int = None):
+    def __init__(self, split_val: float = None, feature: int = None, label: int = None) -> None:
         self.split_val = split_val
         self.feature = feature
         self.label = label
@@ -44,17 +44,17 @@ class Node:
     def split(cls, feature: int, split_val: float):
         return cls(feature=feature, split_val=split_val)
 
-    def is_leaf(self):
+    def is_leaf(self) -> bool:
         return self.label is not None
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.is_leaf():
             return f"Label: {self.label}"
         return f"Feature: {self.feature}, Split: {self.split_val}"
 
 
 class DecisionTree:
-    def __init__(self, max_depth: int):
+    def __init__(self, max_depth: int) -> None:
         # store nodes in list for fast random access
         # lists are 1 indexed
 
@@ -90,7 +90,7 @@ class DecisionTree:
 
         return ret
 
-    def add_node(self, node_ind: int, node_type: str):
+    def add_node(self, node_ind: int, node_type: str) -> int:
         # sourcery skip: assign-if-exp, switch
         if self.nodes[node_ind * 2] is None:
             next_pos = node_ind * 2
@@ -115,10 +115,10 @@ class DecisionTree:
         self.depth = max(self.depth, self.nodes[next_pos].depth)
         return next_pos
 
-    def extend_nodes(self):
+    def extend_nodes(self) -> None:
         self.nodes.extend([None for _ in range(len(self.nodes))])
 
-    def classify_one(self, X: np.ndarray):
+    def classify_one(self, X: np.ndarray) -> int:
         cur = 1
         while True:
             node = self.nodes[cur]
@@ -129,14 +129,14 @@ class DecisionTree:
             if X[node.feature] > node.split_val:
                 cur += 1
 
-    def classify_many(self, X: np.ndarray):
+    def classify_many(self, X: np.ndarray) -> List[int]:
         return [self.classify_one(x) for x in X]
 
-    def accuracy(self, X: np.ndarray, Y: np.ndarray):
+    def accuracy(self, X: np.ndarray, Y: np.ndarray) -> float:
         predictions = np.array(self.classify_many(X), dtype=int)
         return np.mean(predictions == Y)
 
-    def visualize(self, filename: str):
+    def visualize(self, filename: str) -> None:
         g = pgv.AGraph(directed=True)
         g.node_attr["shape"] = "box"
         for i, node in enumerate(self.nodes):
@@ -162,11 +162,11 @@ class DecisionTree:
 
 
 class FitnessEvaluator:
-    def __init__(self, a1: float, a2: float):
+    def __init__(self, a1: float, a2: float) -> None:
         self.a1 = a1
         self.a2 = a2
 
-    def __call__(self, individual: DecisionTree, X: np.ndarray, Y: np.ndarray):
+    def __call__(self, individual: DecisionTree, X: np.ndarray, Y: np.ndarray) -> float:
         predictions = np.array(individual.classify_many(X), dtype=int)
         f1 = np.sum(predictions == Y) / len(Y)
         # TODO: update f2 to non-linear function that intersects y=0 at x=max_depth
@@ -174,7 +174,7 @@ class FitnessEvaluator:
         return self.a1 * f1 + self.a2 * f2
 
 
-def selection(population: List[DecisionTree], fitness: List[float], k: int):
+def selection(population: List[DecisionTree], fitness: List[float], k: int) -> Tuple[DecisionTree, DecisionTree]:
     # tournament selection
     assert len(population) == len(fitness)
 
@@ -189,7 +189,7 @@ def selection(population: List[DecisionTree], fitness: List[float], k: int):
     return p1, p2
 
 
-def crossover(p1: DecisionTree, p2: DecisionTree):
+def crossover(p1: DecisionTree, p2: DecisionTree) -> Tuple[DecisionTree, DecisionTree]:
     """
     take two parents
     child 1 = copy of parent 1
@@ -200,7 +200,7 @@ def crossover(p1: DecisionTree, p2: DecisionTree):
         replace node from p2 with that from p1
     """
 
-    def replace(source: DecisionTree, dest: DecisionTree, ind: int):
+    def replace(source: DecisionTree, dest: DecisionTree, ind: int) -> None:
         q = deque([ind])
         while q:
             cur = q.popleft()
@@ -232,7 +232,7 @@ def crossover(p1: DecisionTree, p2: DecisionTree):
     return c1, c2
 
 
-def crossover_v2(p1: DecisionTree, p2: DecisionTree):
+def crossover_v2(p1: DecisionTree, p2: DecisionTree) -> Tuple[DecisionTree, DecisionTree]:
     """
     a more random and less algoritmic crossover
     takes into consideration all nodes rather
@@ -241,7 +241,7 @@ def crossover_v2(p1: DecisionTree, p2: DecisionTree):
 
     def replace(
         source: DecisionTree, source_ind: int, dest: DecisionTree, dest_ind: int
-    ):
+    ) -> None:
         q = deque([(source_ind, dest_ind)])
         while q:
             si, di = q.popleft()
@@ -279,7 +279,7 @@ def crossover_v2(p1: DecisionTree, p2: DecisionTree):
     return c1, c2
 
 
-def mutate(tree: DecisionTree):
+def mutate(tree: DecisionTree) -> None:
     # TODO: make sure 2 child leaf nodes stay different
     valid = [i for i in range(len(tree.nodes)) if tree.nodes[i] is not None]
     ind = random.choice(valid)
@@ -299,7 +299,7 @@ class EDTClassifier:
         mutation_probability: float,
         max_depth: int,
         fitness_evaluator: FitnessEvaluator,
-    ):
+    ) -> None:
         assert data_loaded, "Training data not loaded"
 
         self.cross_p = crossover_probability
@@ -319,7 +319,7 @@ class EDTClassifier:
         Y: np.ndarray,
         generations: int,
         verbose: bool = False,
-    ):
+    ) -> None:
         fit_eval = self.fitness_eval
 
         n = len(self.population)
@@ -364,7 +364,7 @@ class EDTClassifier:
         fp = sorted(zip(fitnesses, self.population), key=lambda x: x[0], reverse=True)
         self.population = [fp[i][1] for i in range(n)]
 
-    def predict(self, X: np.ndarray, top_k: float = 1):
+    def predict(self, X: np.ndarray, top_k: float = 1) -> List[int]:
         assert 0 < top_k <= 1
 
         predictions = [
