@@ -48,7 +48,7 @@ class DecisionTree:
         # lists are 1 indexed
 
         self.max_depth = max_depth
-        l = 2 ** (max_depth + 3)  # extra space for crossover
+        l = 2 ** (max_depth + 1)
 
         self.nodes = [None for _ in range(l)]
         self.depth_l = [0 for _ in range(l)]  # TODO: store node depth in node class
@@ -100,6 +100,9 @@ class DecisionTree:
         self.depth_l[next_pos] = self.depth_l[node_ind] + 1
         self.depth = max(self.depth, self.depth_l[next_pos])
         return next_pos
+
+    def extend_nodes(self):
+        self.nodes.extend([None for _ in range(len(self.nodes))])
 
     def classify_one(self, X: np.ndarray):
         cur = 1
@@ -208,7 +211,9 @@ def crossover_v2(p1: DecisionTree, p2: DecisionTree):
         q = deque([(source_ind, dest_ind)])
         while q:
             si, di = q.popleft()
-            dest.nodes[di] = copy.deepcopy(source.nodes[si])
+            if di >= len(dest.nodes):
+                dest.extend_nodes()
+            dest.nodes[di] = source.nodes[si]
             if not source.nodes[si].is_leaf():
                 q.append((si * 2, di * 2))
                 q.append((si * 2 + 1, di * 2 + 1))
