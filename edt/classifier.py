@@ -8,6 +8,8 @@ import numpy as np
 
 data_loaded = False
 
+random.seed(2)
+
 
 def load_features(trainX: np.ndarray, trainY: np.ndarray):
     global features, feature_vals, labels, data_loaded
@@ -36,6 +38,9 @@ class Node:
     def split(cls, feature: int, split_val: float):
         return cls(feature=feature, split_val=split_val)
 
+    def is_leaf(self):
+        return self.label is not None
+
 
 class DecisionTree:
     def __init__(self, max_depth: int):
@@ -43,11 +48,12 @@ class DecisionTree:
         # lists are 1 indexed
 
         self.max_depth = max_depth
-        l = 2 ** (max_depth + 1)
+        l = 2 ** (max_depth + 3)  # extra space for crossover
 
         self.nodes = [None for _ in range(l)]
-        self.depth_l = [0 for _ in range(l)]
+        self.depth_l = [0 for _ in range(l)]  # TODO: store node depth in node class
 
+        # root has depth 0
         root_feature = random.choice(features)
         self.nodes[1] = Node.split(
             root_feature, random.choice(feature_vals[root_feature])
@@ -66,7 +72,7 @@ class DecisionTree:
 
             # loop twice for left and right child
             for _ in range(2):
-                if cur * 4 < len(ret.nodes) and split_p <= random.random():
+                if cur * 4 < 2 ** (max_depth + 1) and split_p <= random.random():
                     next_pos = ret.add_node(cur, "split")
                     q.append(next_pos)
                 else:
@@ -75,16 +81,20 @@ class DecisionTree:
         return ret
 
     def add_node(self, node_ind: int, node_type: str):
-        if node_type == "leaf":
-            new_node = Node.leaf(random.choice(labels))
-        elif node_type == "split":
-            feature = random.choice(features)
-            new_node = Node.split(feature, random.choice(feature_vals[feature]))
-
+        # sourcery skip: assign-if-exp, switch
         if self.nodes[node_ind * 2] is None:
             next_pos = node_ind * 2
         else:
             next_pos = node_ind * 2 + 1
+
+        if node_type == "leaf":
+            if next_pos % 2 == 1 and self.nodes[next_pos - 1].is_leaf():
+                new_node = Node.leaf(random.choice([i for i in labels if i != self.nodes[next_pos - 1].label]))
+            else:
+                new_node = Node.leaf(random.choice(labels))
+        elif node_type == "split":
+            feature = random.choice(features)
+            new_node = Node.split(feature, random.choice(feature_vals[feature]))
 
         self.nodes[next_pos] = new_node
         self.depth_l[next_pos] = self.depth_l[node_ind] + 1
@@ -152,20 +162,20 @@ def crossover(p1: DecisionTree, p2: DecisionTree):
         replace node from p2 with that from p1
     """
 
-    def replace(source: DecisionTree, replace: DecisionTree, ind: int):
+    def replace(source: DecisionTree, dest: DecisionTree, ind: int):
         q = deque([ind])
         while q:
             cur = q.popleft()
-            source.nodes[cur] = replace.nodes[cur]
-            if source.nodes[cur].label is None:
+            dest.nodes[cur] = source.nodes[cur]
+            if dest.nodes[cur].label is None:
                 q.append(cur * 2)
                 q.append(cur * 2 + 1)
 
         # clean unused nodes
         # let garbage collector do the heavy lifting
-        for i in range(2, len(source.nodes)):
-            if source.nodes[i // 2] is None:
-                source.nodes[i] = None
+        for i in range(2, len(dest.nodes)):
+            if dest.nodes[i // 2] is None:
+                dest.nodes[i] = None
 
     overlaps = [
         i
@@ -175,12 +185,56 @@ def crossover(p1: DecisionTree, p2: DecisionTree):
 
     c1 = copy.deepcopy(p1)
     ind = random.choice(overlaps)
-    replace(c1, p2, ind)
+    replace(p2, c1, ind)
 
     c2 = copy.deepcopy(p2)
     ind = random.choice(overlaps)
-    replace(c2, p1, ind)
+    replace(p1, c2, ind)
 
+    return c1, c2
+
+
+def crossover_v2(p1: DecisionTree, p2: DecisionTree):
+    """
+    a more random and less algoritmic crossover
+    takes into consideration all nodes rather
+    than just the ones on the same depth
+    """
+
+    def replace(
+        source: DecisionTree, source_ind: int, dest: DecisionTree, dest_ind: int
+    ):
+        print(source_ind, dest_ind)
+        q = deque([(source_ind, dest_ind)])
+        while q:
+            si, di = q.popleft()
+            dest.nodes[di] = copy.deepcopy(source.nodes[si])
+            if not source.nodes[si].is_leaf():
+                q.append((si * 2, di * 2))
+                q.append((si * 2 + 1, di * 2 + 1))
+
+        # clean unused nodes
+        reachable = [False for i in range(len(dest.nodes))]
+        q = deque([dest_ind])
+        reachable[dest_ind] = True
+        while q:
+            cur = q.popleft()
+            if not reachable[cur]:
+                dest.nodes[cur] = None
+            elif not dest.nodes[cur].is_leaf() and cur * 2 < len(dest.nodes):
+                reachable[cur * 2] = True
+                reachable[cur * 2 + 1] = True
+            if cur * 2 < len(dest.nodes):
+                q.append(cur * 2)
+                q.append(cur * 2 + 1)
+
+    p1_inds = [i for i in range(len(p1.nodes)) if p1.nodes[i] is not None]
+    p2_inds = [i for i in range(len(p2.nodes)) if p2.nodes[i] is not None]
+
+    c1 = copy.deepcopy(p1)
+    replace(p2, random.choice(p2_inds), c1, random.choice(p1_inds))
+    c2 = copy.deepcopy(p2)
+    replace(p1, random.choice(p1_inds), c2, random.choice(p2_inds))
     return c1, c2
 
 
