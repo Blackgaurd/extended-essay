@@ -8,7 +8,7 @@ from collections import deque
 import copy
 import random
 import statistics
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import numpy as np
 import pygraphviz as pgv
@@ -30,7 +30,9 @@ def load_features(trainX: np.ndarray, trainY: np.ndarray) -> None:
 
 
 class Node:
-    def __init__(self, split_val: float = None, feature: int = None, label: int = None) -> None:
+    def __init__(
+        self, split_val: float = None, feature: int = None, label: int = None
+    ) -> None:
         self.split_val = split_val
         self.feature = feature
         self.label = label
@@ -61,7 +63,7 @@ class DecisionTree:
         self.max_depth = max_depth
         l = 2 ** (max_depth + 1)
 
-        self.nodes = [None for _ in range(l)]
+        self.nodes: List[Optional[Node]] = [None for _ in range(l)]
 
         # root has depth 0
         root_feature = random.choice(features)
@@ -174,7 +176,9 @@ class FitnessEvaluator:
         return self.a1 * f1 + self.a2 * f2
 
 
-def selection(population: List[DecisionTree], fitness: List[float], k: int) -> Tuple[DecisionTree, DecisionTree]:
+def selection(
+    population: List[DecisionTree], fitness: List[float], k: int
+) -> Tuple[DecisionTree, DecisionTree]:
     # tournament selection
     assert len(population) == len(fitness)
 
@@ -205,7 +209,7 @@ def crossover(p1: DecisionTree, p2: DecisionTree) -> Tuple[DecisionTree, Decisio
         while q:
             cur = q.popleft()
             dest.nodes[cur] = source.nodes[cur]
-            if dest.nodes[cur].label is None:
+            if not dest.nodes[cur].is_leaf():
                 q.append(cur * 2)
                 q.append(cur * 2 + 1)
 
@@ -232,7 +236,9 @@ def crossover(p1: DecisionTree, p2: DecisionTree) -> Tuple[DecisionTree, Decisio
     return c1, c2
 
 
-def crossover_v2(p1: DecisionTree, p2: DecisionTree) -> Tuple[DecisionTree, DecisionTree]:
+def crossover_v2(
+    p1: DecisionTree, p2: DecisionTree
+) -> Tuple[DecisionTree, DecisionTree]:
     """
     a more random and less algoritmic crossover
     takes into consideration all nodes rather
@@ -269,6 +275,7 @@ def crossover_v2(p1: DecisionTree, p2: DecisionTree) -> Tuple[DecisionTree, Deci
                 q.append(cur * 2)
                 q.append(cur * 2 + 1)
 
+    # start from 2 to avoid root node
     p1_inds = [i for i in range(2, len(p1.nodes)) if p1.nodes[i] is not None]
     p2_inds = [i for i in range(2, len(p2.nodes)) if p2.nodes[i] is not None]
 
@@ -283,11 +290,11 @@ def mutate(tree: DecisionTree) -> None:
     # TODO: make sure 2 child leaf nodes stay different
     valid = [i for i in range(len(tree.nodes)) if tree.nodes[i] is not None]
     ind = random.choice(valid)
-    if tree.nodes[ind].label is None:
+    if tree.nodes[ind].is_leaf():
+        tree.nodes[ind] = Node.leaf(random.choice(labels))
+    else:
         feature = random.choice(features)
         tree.nodes[ind] = Node.split(feature, random.choice(feature_vals[feature]))
-    else:
-        tree.nodes[ind] = Node.leaf(random.choice(labels))
 
 
 class EDTClassifier:
