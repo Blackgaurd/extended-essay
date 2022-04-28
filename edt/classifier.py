@@ -1,6 +1,6 @@
 # todo list:
-# update nodes to include left and right child indices
 # add function to balance tree
+# - random nature of trees rarely have O(n) complexity
 # update fitness function to take into account depth
 # - punish trees with depth > max depth
 
@@ -13,8 +13,6 @@ from typing import List
 import numpy as np
 
 data_loaded = False
-
-random.seed(2)
 
 
 def load_features(trainX: np.ndarray, trainY: np.ndarray):
@@ -137,15 +135,15 @@ class DecisionTree:
 
 
 class FitnessEvaluator:
-    def __init__(self, a1: float, a2: float, max_depth: int):
+    def __init__(self, a1: float, a2: float):
         self.a1 = a1
         self.a2 = a2
-        self.max_depth = max_depth
 
     def __call__(self, individual: DecisionTree, X: np.ndarray, Y: np.ndarray):
         predictions = np.array(individual.classify_many(X), dtype=int)
         f1 = np.sum(predictions == Y) / len(Y)
-        f2 = 0  # TODO: figure out how f2 works
+        # TODO: update f2 to non-linear function that intersects y=0 at x=max_depth
+        f2 = 1 - individual.depth / individual.max_depth
         return self.a1 * f1 + self.a2 * f2
 
 
@@ -217,13 +215,14 @@ def crossover_v2(p1: DecisionTree, p2: DecisionTree):
     def replace(
         source: DecisionTree, source_ind: int, dest: DecisionTree, dest_ind: int
     ):
-        print(source_ind, dest_ind)
         q = deque([(source_ind, dest_ind)])
         while q:
             si, di = q.popleft()
             if di >= len(dest.nodes):
                 dest.extend_nodes()
             dest.nodes[di] = source.nodes[si]
+            dest.nodes[di].depth = dest.nodes[di // 2].depth + 1
+            dest.depth = max(dest.depth, dest.nodes[di].depth)
             if not source.nodes[si].is_leaf():
                 q.append((si * 2, di * 2))
                 q.append((si * 2 + 1, di * 2 + 1))
@@ -243,8 +242,8 @@ def crossover_v2(p1: DecisionTree, p2: DecisionTree):
                 q.append(cur * 2)
                 q.append(cur * 2 + 1)
 
-    p1_inds = [i for i in range(len(p1.nodes)) if p1.nodes[i] is not None]
-    p2_inds = [i for i in range(len(p2.nodes)) if p2.nodes[i] is not None]
+    p1_inds = [i for i in range(2, len(p1.nodes)) if p1.nodes[i] is not None]
+    p2_inds = [i for i in range(2, len(p2.nodes)) if p2.nodes[i] is not None]
 
     c1 = copy.deepcopy(p1)
     replace(p2, random.choice(p2_inds), c1, random.choice(p1_inds))
@@ -311,7 +310,8 @@ class EDTClassifier:
             # tournament selection + crossover
             for _ in range(int(n * self.cross_p / 2)):
                 p1, p2 = selection(self.population, fitnesses, 2)
-                c1, c2 = crossover(p1, p2)
+                # c1, c2 = crossover(p1, p2)
+                c1, c2 = crossover_v2(p1, p2)
                 new_pop.extend((c1, c2))
 
             # elitism
