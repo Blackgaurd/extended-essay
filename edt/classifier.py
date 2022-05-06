@@ -1,8 +1,7 @@
 # todo list:
 # add function to balance tree
 # - random nature of trees rarely have O(n) complexity
-# update fitness function to take into account depth
-# - punish trees with depth > max depth
+# add multiprocessing support
 
 from collections import deque
 import copy
@@ -348,33 +347,25 @@ class EDTClassifier:
         Y: np.ndarray,
         generations: int,
         verbose: bool = False,
+        valX: np.ndarray = None,
+        valY: np.ndarray = None,
     ) -> None:
-        fit_eval = self.fitness_eval
-        fit_eval._init(X, Y)
+        train_eval = self.fitness_eval
+        train_eval._init(X, Y)
+
+        if validation := (valX is not None and valY is not None):
+            val_eval = self.fitness_eval
+            val_eval._init(valX, valY)
 
         n = len(self.population)
 
         for gen in range(1, generations + 1):
-            fitnesses = [fit_eval(tree) for tree in self.population]
+            fitnesses = [train_eval(tree) for tree in self.population]
 
             if verbose and gen % verbose == 0:
-                accuracies = [fit_eval.accuracy(tree) for tree in self.population]
-                tree_gen = tuple(tree.depth for tree in self.population)
-                max_depth = max(tree_gen)
-                min_depth = min(tree_gen)
-                average_depth = statistics.mean(tree_gen)
-                median_depth = statistics.median(tree_gen)
-                std_depth = statistics.stdev(tree_gen)
-                print(f"Generation {gen}/{generations}")
-                print(f"Average fitness: {sum(fitnesses) / len(fitnesses)}")
-                print(f"Average accuracy: {sum(accuracies) / len(accuracies)}")
-                print("Tree depths:")
-                print(f"- max    : {max_depth}")
-                print(f"- min    : {min_depth}")
-                print(f"- average: {average_depth:.2f}")
-                print(f"- median : {median_depth:.2f}")
-                print(f"- std    : {std_depth:.2f}")
-                print()
+                self._verbose(
+                    gen, generations, train_eval, validation, val_eval, fitnesses
+                )
 
             new_pop = []
 
@@ -396,13 +387,47 @@ class EDTClassifier:
             for i in random.sample(range(n), int(n * self.mut_p)):
                 mutate(new_pop[i])
 
-            # TODO: delete old gen if this takes too much memory
             self.population = new_pop
 
         # sort by fitness
-        fitnesses = [fit_eval(tree) for tree in self.population]
+        fitnesses = [train_eval(tree) for tree in self.population]
         fp = sorted(zip(fitnesses, self.population), key=lambda x: x[0], reverse=True)
         self.population = [fp[i][1] for i in range(n)]
+
+    def _verbose(
+        self,
+        gen: int,
+        generations: int,
+        train_eval: FitnessEvaluator,
+        validation: bool,
+        val_eval: FitnessEvaluator,
+        fitnesses: List[float],
+    ) -> None:
+        accuracies = [train_eval.accuracy(tree) for tree in self.population]
+        tree_gen = tuple(tree.depth for tree in self.population)
+        max_depth = max(tree_gen)
+        min_depth = min(tree_gen)
+        average_depth = statistics.mean(tree_gen)
+        median_depth = statistics.median(tree_gen)
+        std_depth = statistics.stdev(tree_gen)
+
+        if validation:
+            val_accuracies = [val_eval.accuracy(tree) for tree in self.population]
+
+        print(f"Generation {gen}/{generations}")
+        print(f"Average fitness: {sum(fitnesses) / len(fitnesses)}")
+        print(f"Average accuracy: {sum(accuracies) / len(accuracies)}")
+        if validation:
+            print(
+                f"Average validation accuracy: {sum(val_accuracies) / len(val_accuracies)}"
+            )
+        print("Tree depths:")
+        print(f"- max    : {max_depth}")
+        print(f"- min    : {min_depth}")
+        print(f"- average: {average_depth:.2f}")
+        print(f"- median : {median_depth:.2f}")
+        print(f"- std    : {std_depth:.2f}")
+        print()
 
     def predict(self, X: np.ndarray, top_k: float = 1) -> List[int]:
         assert 0 < top_k <= 1
