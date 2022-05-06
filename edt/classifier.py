@@ -1,6 +1,4 @@
 # todo list:
-# add function to balance tree
-# - random nature of trees rarely have O(n) complexity
 # add multiprocessing support
 
 from collections import deque
@@ -38,6 +36,8 @@ def load_features(
 
 
 class Node:
+    __slots__ = "split_val", "feature", "label", "depth"
+
     def __init__(
         self, split_val: float = None, feature: int = None, label: int = None
     ) -> None:
@@ -64,12 +64,14 @@ class Node:
 
 
 class DecisionTree:
-    def __init__(self, max_depth: int) -> None:
+    __slots__ = "nodes", "depth", "optimal_depth"
+
+    def __init__(self, optimal_depth: int) -> None:
         # store nodes in list for fast random access
         # lists are 1 indexed
 
-        self.max_depth = max_depth
-        l = 2 ** (max_depth + 1)
+        self.optimal_depth = optimal_depth
+        l = 2 ** (optimal_depth + 1)
 
         self.nodes: List[Optional[Node]] = [None for _ in range(l)]
 
@@ -81,9 +83,9 @@ class DecisionTree:
         self.depth = 0
 
     @classmethod
-    def generate_random(cls, max_depth: int, split_p: float):
+    def generate_random(cls, optimal_depth: int, split_p: float):
         assert 0 <= split_p < 1
-        ret = cls(max_depth)
+        ret = cls(optimal_depth)
 
         # generate tree with bfs
         q = deque([1])
@@ -92,7 +94,10 @@ class DecisionTree:
 
             # loop twice for left and right child
             for _ in range(2):
-                if ret.nodes[cur].depth + 2 <= max_depth and random.random() <= split_p:
+                if (
+                    ret.nodes[cur].depth + 2 <= optimal_depth
+                    and random.random() <= split_p
+                ):
                     next_pos = ret.add_node(cur, "split")
                     q.append(next_pos)
                 else:
@@ -191,8 +196,8 @@ class FitnessEvaluator:
 
     def __call__(self, individual: DecisionTree) -> float:
         f1 = self.accuracy(individual)
-        # TODO: update f2 to non-linear function that intersects y=0 at x=max_depth
-        f2 = self.f2_func(individual.depth, individual.max_depth)
+        # TODO: update f2 to non-linear function that intersects y=0 at x=optimal_depth
+        f2 = self.f2_func(individual.depth, individual.optimal_depth)
 
         return self.a1 * f1 + self.a2 * f2
 
@@ -280,21 +285,23 @@ class EDTClassifier:
         self,
         population_size: int,
         split_proba: float,
+        selection_k: int,
         crossover_probability: float,
         mutation_probability: float,
-        max_depth: int,
+        optimal_depth: int,
         fitness_evaluator: FitnessEvaluator,
     ) -> None:
         assert data_loaded, "Training data not loaded"
 
+        self.selection_k = selection_k
         self.cross_p = crossover_probability
         self.mut_p = mutation_probability
-        self.max_depth = max_depth
+        self.optimal_depth = optimal_depth
         self.fitness_eval = fitness_evaluator
 
         # initiate population
         self.population = [
-            DecisionTree.generate_random(max_depth, split_proba)
+            DecisionTree.generate_random(optimal_depth, split_proba)
             for _ in range(population_size)
         ]
 
@@ -307,11 +314,12 @@ class EDTClassifier:
         valX: np.ndarray = None,
         valY: np.ndarray = None,
     ) -> None:
-        train_eval = self.fitness_eval
+        train_eval = copy.copy(self.fitness_eval)
         train_eval._init(X, Y)
 
+        val_eval = None
         if validation := (valX is not None and valY is not None):
-            val_eval = self.fitness_eval
+            val_eval = copy.copy(self.fitness_eval)
             val_eval._init(valX, valY)
 
         n = len(self.population)
@@ -328,7 +336,7 @@ class EDTClassifier:
 
             # tournament selection + crossover
             for _ in range(int(n * self.cross_p / 2)):
-                p1, p2 = selection(self.population, fitnesses, 2)
+                p1, p2 = selection(self.population, fitnesses, self.selection_k)
                 # c1, c2 = crossover(p1, p2)
                 c1, c2 = crossover_v2(p1, p2)
                 new_pop.extend((c1, c2))
@@ -360,7 +368,7 @@ class EDTClassifier:
         val_eval: FitnessEvaluator,
         fitnesses: List[float],
     ) -> None:
-        accuracies = [train_eval.accuracy(tree) for tree in self.population]
+        accuracies = tuple(train_eval.accuracy(tree) for tree in self.population)
         tree_gen = tuple(tree.depth for tree in self.population)
         max_depth = max(tree_gen)
         min_depth = min(tree_gen)
@@ -369,7 +377,7 @@ class EDTClassifier:
         std_depth = statistics.stdev(tree_gen)
 
         if validation:
-            val_accuracies = [val_eval.accuracy(tree) for tree in self.population]
+            val_accuracies = tuple(val_eval.accuracy(tree) for tree in self.population)
 
         print(f"Generation {gen}/{generations}")
         print(f"Average fitness: {sum(fitnesses) / len(fitnesses)}")
