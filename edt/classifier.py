@@ -8,18 +8,21 @@ from collections import deque
 import copy
 import random
 import statistics
-from typing import Any, Callable, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 import numpy as np
 import pygraphviz as pgv
 
 data_loaded = False
 
-random.seed(2)
 
-
-def load_features(trainX: np.ndarray, trainY: np.ndarray) -> None:
-    global features, feature_vals, labels, data_loaded
+def load_features(
+    trainX: np.ndarray,
+    trainY: np.ndarray,
+    feature_names: List[str],
+    label_names: Dict[int, str],
+) -> None:
+    global features, feature_vals, labels, data_loaded, _feature_names, _label_names
 
     # features and feature values
     features = list(range(trainX.shape[1]))  #! watch for this
@@ -27,6 +30,10 @@ def load_features(trainX: np.ndarray, trainY: np.ndarray) -> None:
 
     # unique labels
     labels = list(set(trainY))
+
+    # feature and label names
+    _feature_names = feature_names
+    _label_names = label_names
 
     data_loaded = True
 
@@ -53,8 +60,8 @@ class Node:
 
     def __str__(self) -> str:
         if self.is_leaf():
-            return f"Label: {self.label}"
-        return f"Feature: {self.feature}, Split: {self.split_val}"
+            return f"Label: {_label_names[self.label]}"
+        return f"Feature: {_feature_names[self.feature]}, Split: {self.split_val}"
 
 
 class DecisionTree:
@@ -166,11 +173,14 @@ class DecisionTree:
 
 
 class FitnessEvaluator:
-    def __init__(self, a1: float, a2: float) -> None:
+    def __init__(
+        self, a1: float, a2: float, f2_func: Callable[[int, int], float]
+    ) -> None:
         self.a1 = a1
         self.a2 = a2
         self.X: Optional[np.ndarray] = None
         self.Y: Optional[np.ndarray] = None
+        self.f2_func = f2_func
 
     def _init(self, X: np.ndarray, Y: np.ndarray) -> None:
         self.X = X
@@ -183,7 +193,8 @@ class FitnessEvaluator:
     def __call__(self, individual: DecisionTree) -> float:
         f1 = self.accuracy(individual)
         # TODO: update f2 to non-linear function that intersects y=0 at x=max_depth
-        f2 = 1 - individual.depth / individual.max_depth
+        f2 = self.f2_func(individual.depth, individual.max_depth)
+
         return self.a1 * f1 + self.a2 * f2
 
 
