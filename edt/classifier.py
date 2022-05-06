@@ -214,49 +214,6 @@ def selection(
     return p1, p2
 
 
-def crossover(p1: DecisionTree, p2: DecisionTree) -> Tuple[DecisionTree, DecisionTree]:
-    """
-    take two parents
-    child 1 = copy of parent 1
-        select random node from p1 and p2
-        replace node from p1 with that from p2
-    child 2 = copy of parent 2
-        select random node from p1 and p2
-        replace node from p2 with that from p1
-    """
-
-    def replace(source: DecisionTree, dest: DecisionTree, ind: int) -> None:
-        q = deque([ind])
-        while q:
-            cur = q.popleft()
-            dest.nodes[cur] = source.nodes[cur]
-            if not dest.nodes[cur].is_leaf():
-                q.append(cur * 2)
-                q.append(cur * 2 + 1)
-
-        # clean unused nodes
-        # let garbage collector do the heavy lifting
-        for i in range(2, len(dest.nodes)):
-            if dest.nodes[i // 2] is None:
-                dest.nodes[i] = None
-
-    overlaps = [
-        i
-        for i in range(len(p1.nodes))
-        if p1.nodes[i] is not None and p2.nodes[i] is not None
-    ]
-
-    c1 = copy.deepcopy(p1)
-    ind = random.choice(overlaps)
-    replace(p2, c1, ind)
-
-    c2 = copy.deepcopy(p2)
-    ind = random.choice(overlaps)
-    replace(p1, c2, ind)
-
-    return c1, c2
-
-
 def crossover_v2(
     p1: DecisionTree, p2: DecisionTree
 ) -> Tuple[DecisionTree, DecisionTree]:
