@@ -1,10 +1,9 @@
 # todo list:
-# add multiprocessing support
 
-from collections import deque
 import copy
 import random
 import statistics
+from collections import deque
 from typing import Callable, Dict, List, Optional, Tuple
 
 import numpy as np
