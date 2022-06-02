@@ -1,20 +1,21 @@
 File: essay/essay.tex
 Encoding: ascii
-Words in text: 685
-Words in headers: 24
+Words in text: 1397
+Words in headers: 33
 Words outside text (captions, etc.): 3
-Number of headers: 11
+Number of headers: 18
 Number of floats/tables/figures: 1
-Number of math inlines: 2
-Number of math displayed: 0
+Number of math inlines: 19
+Number of math displayed: 1
 Subcounts:
   text+headers+captions (#headers/#floats/#inlines/#displayed)
   0+2+0 (1/0/0/0) _top_
   0+2+0 (1/0/0/0) Section: Background Information
   155+5+0 (1/0/0/0) Subsection: Machine Learning and its Applications
-  349+2+3 (1/1/2/0) Subsection: Decision Trees
-  181+2+0 (1/0/0/0) Subsection: Genetic Algorithm
-  0+3+0 (1/0/0/0) Subsection: Evolutionary Decision Tree
+  354+2+3 (1/1/3/0) Subsection: Decision Trees
+  264+2+0 (1/0/0/0) Subsection: Genetic Algorithm
+  131+3+0 (1/0/0/0) Section: Evolutionary Decision Tree
+  493+9+0 (7/0/16/1) Subsection: Evolutionary Process
   0+2+0 (1/0/0/0) Section: Experimental Methodology
   0+2+0 (1/0/0/0) Section: Data Analysis
   0+2+0 (1/0/0/0) Section: Error Analysis

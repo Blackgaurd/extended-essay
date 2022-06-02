@@ -1,5 +1,7 @@
 .vscode/
-tests/
 __pycache__/
-test.py
-cache/
+venv/
+
+essay.*
+!essay.pdf
+!essay.tex

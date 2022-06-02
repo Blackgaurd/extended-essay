@@ -1,3 +1,6 @@
+% TODO: Change font to helvetica
+% double spacing
+
 % latex template
 \documentclass[12pt]{article}
 \usepackage[utf8]{inputenc}
@@ -95,11 +98,86 @@ Taking a page straight out of Darwin's theory of evolution, genetic algorithms e
 
 The species in real life which benefit the most from evolution are those that are able to maintain diversity. With diversity, they can overcome external problems like diseases or natural disasters. Similarly, the genetic algorithm puts a strong emphasis on diversity, so it can explore a large solution space and escape falling into a local minimum. Diversity is achieved with several stages of randomness introduced in each generation, in selection, crossover and mutation.
 
-\subsection{Evolutionary Decision Tree}
+\section{Evolutionary Decision Tree}
 
-An evolutionary decision tree (EDT) uses a genetic algorithm to optimize a decision tree.
+An Evolutionary Decision Tree (EDT) uses a genetic algorithm to optimize decision trees. It aims to take the benefits from both vanilla decision trees and random forests, while adding a layer of optimization that increases its accuracy with training.
+
+Similar to vanilla decision trees, an EDT is able to output a singular or small number of low complexity trees. The first of the two advantages of this output is that it makes the tree comprehensible by humans and easy to follow along. But more importantly, it avoids overfitting of the training dataset, a major downfall of overly complicated and large decision trees.
+
+And similar to random forests, EDT's are able to harness random number generators to explore a larger solution space, thereby minimizing the chances of fitting into a local solution.
+
+\subsection{Evolutionary Process}
+
+The steps in constructing an EDT are built closely on the steps of the genetic algorithm. Each step has been modified or tweaked to support operations with binary trees.
+
+\subsubsection{Initialization}
+
+The EDT population is composed of $n$ random generated decision trees, where $n$ is the population size. A randomly generated tree starts with a root node. Each of its children is then either a split node or a leaf node, according to a probability $p$. This step is repeated until a maximum desired depth is reached, or until all branches end in leaf nodes \cite{faik_2020}.
+
+\begin{itemize}
+    \item If a node is a split node, it is randomly assigned a feature and split value.
+    \item If a node is a leaf node, it is randomly assigned a label. Further restrictions are put in place to ensure that no branch in the tree can only lead to a single label.
+\end{itemize}
+
+\subsubsection{Fitness Evaluation}
+
+The fitness for each individual in the population will be measured by the following formula \cite{faik_2020}:
+
+\[F_i = c_1 \cdot a_i + c_2 \cdot f(d_i)\]
+
+\begin{itemize}
+    \item $F_i$ is the fitness of the $i$-th individual.
+    \item $a_i$ is the accuracy of the $i$-th individual on the training data.
+    \item $d_i$ is the depth of the $i$-th individual.
+    \item $f(x)$ is a predetermined function.
+    \item $c_1, c_2$ are predetermined constants.
+\end{itemize}
+
+\subsubsection{Selection}
+
+The selection process will be a combination of two separate algorithms. The first of which will be tournament selection. A random set of $k$ individuals will be ranked by fitness, and the highest score will be able to move on to the crossover stage. This process is repeated twice, once for each parent in crossover. The random nature of this selection process ensures that diversity is maintained between generations, and that certain traits will not be entirely lost \cite{blickle_1997}.
+
+The second selection process will be elitism. This is where the fittest individuals from the previous generation will be moved directly on to the current generation, without crossover. This is to ensure that the traits of the best individuals are not lost through generations.
+
+A total of $t$ individuals will be moved onto the next generation through elitism. The remaining $n - t$ spots will be filled through tournament selection and crossover.
+
+\subsubsection{Crossover}
+
+For crossover, two parent trees will produce two child trees in order to maintain the population count. The first child will originally be a direct copy of the first parent. A random node is then selected from each parent. The node from the first parent, and its entire subtree, will be replaced by the node from the second parent and its subtree.
+
+% TODO: add diagram for crossover
+
+\subsubsection{Mutation}
+
+If a tree is chosen for mutation, it will have one of its values traits randomly chosen and randomly altered. If the node selected is a split node, its feature and split value will be altered. Otherwise, if the node selected is a leaf node, it will have its label altered.
+
+\subsubsection{Termination}
+
+There are two conditions for termination. The first of which is when the number of generations has reached a predetermined $n$. The other condition is when the average fitness does not improve by a predetermined threshold for $x$ generations. Which ever condition comes first is when the EDT will terminate.
 
 \section{Experimental Methodology}
+
+The goal of this investigation is to compare an EDT to other classification algorithms including a vanilla decision tree, random forest classifier, and a multilayer perceptron.
+
+\subsection{Independent Variables}
+
+Three datasets of varying sizes will be used.
+
+\begin{center}
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+        Dataset & Features & Labels & Instances \\
+        \hline \hline
+        \href{https://archive-beta.ics.uci.edu/ml/datasets/breast+cancer}{Breast Cancer} & $10$ & $2$ & $286$ \\
+        \hline
+        \href{https://archive-beta.ics.uci.edu/ml/datasets/mushroom}{Mushroom} & $23$ & $2$ & $8124$ \\
+        \hline
+        \href{https://archive-beta.ics.uci.edu/ml/datasets/adult}{Adult} & $15$ & $2$ & $48842$ \\
+        \hline
+    \end{tabular}
+\end{center}
+
+\subsection{Dependent Variables}
 
 \section{Data Analysis}
 
