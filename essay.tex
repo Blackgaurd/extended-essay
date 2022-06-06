@@ -1,3 +1,8 @@
+% research question:
+% how does each hyperparamter play a part in evolutionary decision tree performance?
+% ^ maybe too abstract
+% how does an edt compare with other data classification algorithms of similar nature
+
 % TODO: Change font to helvetica
 % double spacing
 
@@ -52,11 +57,24 @@ Machine learning (ML) is a branch of artificial intelligence that uses large dat
 
 Where machine learning shines is in its ability to solve problems that would typically be either impossible for impractical for traditional algorithms. Furthermore, machine learning models are able to generalize these solutions and apply them to additional problems it has never encountered before.
 
-In short, machine learning is a combination of computer science, statistics, and optimization. It uses knowledge from different fields to ``teach'' computers to complete tasks. As the model looks at more and more data, it starts to recognize patterns among it and optimizes itself.
+In short, machine learning is a combination of computer science, statistics, and optimization. It uses knowledge from different fields to ``teach'' computers to complete tasks. As the model looks at more and more data, it starts to recognize patterns among it and optimizes itself. The main problem that data scientists are trying to solve with regard to machine learning is how we actually optimize the algorithms.
 
 \subsection{Decision Trees}
 
-When most think about machine learning, the first thing that comes to mind are neural networks. Neural networks, which are abstractly complex yet powerful algorithms, only make up one subfield of machine learning itself, called \textit{deep learning}. However, there exist several other branches of machine learning, such as \textit{supervised learning}, the main focus of this paper. The most well known model within supervised learning has to be the decision tree. They are binary trees which employ a straightforward \textit{if-else} flow to classify data.
+When most think about machine learning, the first thing that comes to mind are neural networks. Neural networks, which are abstractly complex yet powerful algorithms, only make up one field of machine learning itself, called deep learning. Deep learning has built a reputation to be extremely versatile and powerful, able to generalize any function across data. However, one of its biggest drawbacks is that the with the limits of our current technology and understanding of deep learning, neural networks are often described as a ``black box'' \cite{Buhrmester_Munch_Arens_2019}. In other words, all we know is to give the network a set of inputs and outputs, and we have very little understanding of each neuron's behavior.
+
+There exists another branch of machine learning, called supervised learning. This approach aims to solve problems of data classification and regression \cite{Supervised_unsupervised_learning}. The data that is deals with is still made of inputs and outputs. Each characteristic of the data is called a \textit{feature} and the outputs are called \textit{labels}. One of the most well established models within supervised learning is the decision tree. They are binary trees which employ a straightforward \textit{if-else} flow to classify or regress data. Contrary to neural networks, decision trees are much easier to interpret for humans.
+
+Binary trees are made up of nodes, which are connected by edges. As its name suggests, each node is connected to two child nodes, which have their own respective child nodes, etc. Nodes at the bottom of the tree are called leaves, and do not branch out to any more children.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.6]{figs/binary_tree.png}
+    \caption{Binary Tree Diagram}
+    \label{fig:binarytree}
+\end{figure}
+
+Decision trees use the structure of binary trees to classify or regress data. Non-leaf nodes are referred to as ``split nodes''. Split nodes each have a feature and a split value. When data reaches that node, it is passed on to the left child if the feature value is less than the split value, and to the right child if otherwise. Leaf nodes each contain a label. If data reaches a leaf node, it is classified as that label.
 
 \begin{figure}[H]
     \centering
@@ -65,127 +83,97 @@ When most think about machine learning, the first thing that comes to mind are n
     \label{fig:decisiontree}
 \end{figure}
 
-\hyperref[fig:decisiontree]{Figure 1} shows a simple decision tree to predict whether it will rain based on other weather conditions. Given a cloudy day with no sun, the model will predict that it will rain, as outlined by the red lines on the diagram. The anatomy of a decision tree consists of several parts \cite{dt_skl_doc}:
+\hyperref[fig:decisiontree]{Figure 1} shows a simple decision tree to predict whether it will rain based on other weather conditions. Given a cloudy day with no sun, the model will predict that it will rain, as outlined by the red lines on the diagram.
 
-\begin{itemize}
-    \item \textbf{Node}: cells that contain data. A tree is made of several nodes connected by edges.
-    \begin{itemize}
-        \item \textbf{Root node}: the single node at the very top of the tree.
-        \item \textbf{Split node}: a split node splits into two other child nodes based on a feature and split value.
-        \item \textbf{Leaf node}: a node at the end of a tree; it does not split into further nodes.
-        \item \textbf{Child node}: the nodes that follow split nodes.
-    \end{itemize}
-    \item \textbf{Feature}: an individual characteristic of a dataset \cite{pattern_recognition_ml}, the $i$th feature is represented as $x_i$.
-    \item \textbf{Split Value}: a value that classifies any data that the node encounters (e.g. $x_i \le2.7$)
-\end{itemize}
+% TODO: include diagram of labelled tree
 
-The main computational problem with decision trees is how first construct, then optimize them. If we were to generate a random decision tree structure, it could potentially become very large and unnecessarily complex, taking up extra resources in computation. And if we were to simply assign each node a random feature and split value, it is very unlikely the model will perform well in predictions.
-
-The approach used in vanilla decision trees is a greedy top-down algorithm that builds nodes, assigning it features and split values as it moves down the tree \cite{dt_induction}. Other well-established algorithms for constructing decision trees include random forests and gradient boosting. This paper aims to investigate a new decision tree construction and optimization algorithm by employing the genetic algorithm.
+The standard way to generate a decision tree is to use a top-down greedy recursive algorithm based on how many values are incorrectly classified, or gini-impurity. At each step of the tree, the split value is determined by testing out every single value of every single feature, and seeing which one yields the lowest gini-impurity. The left child of the current node is then built using the data that falls under the split value, and the right child is built using the remaining data. This process continues until the gini-impurity is less than a preset value, or until a certain depth is reached. Certain algorithms for decision tree generation also balance the binary tree for reduced time complexity in testing \cite{dt_skl_doc}.
 
 \subsection{Genetic Algorithm}
 
-Taking a page straight out of Darwin's theory of evolution, genetic algorithms employ the principle of \textit{survival of the fittest}. It generates populations of algorithms or models that evolve and reproduce over time based on a set of criteria, improving on performance. Each \textit{individual} of the population is represented by a form of data structure. Each piece of data can be paralleled to a gene, which when all combined describes the behavior of the individual \cite{intro_to_ga}. The steps of the genetic algorithm are as follows:
+Taking a page straight out of Darwin's theory of evolution, genetic algorithms employ the principle of ``survival of the fittest''. Biological evolution has been able to produce billions \cite{Sweetlove_2011} of different species of organisms that have all become very well adapted to their environments. It does so by ensuring that only the individuals that are able to survive in their environments the best are able to reproduce. Those that are unable to find food, get hunted easily by predators, or easily catch diseases are unable to pass on their genes to the next generation. This also ensures that only the strongest genes are kept from generation to generation.
 
-\begin{itemize}
-    \item \textbf{Initialization}: an initial population is generated with random genes using a set of preset hyperparameters.
-    \item \textbf{Fitness evaluation}: a score given to each individual in the population based on how well it performs for the problem.
-    \item \textbf{Selection}: a process to select the individuals that will carry forward or reproduce for the next generation, usually based on fitness.
-    \item \textbf{Crossover}: a process to either sexually or asexually reproduce individuals for the next generation based on the previous generation.
-    \item \textbf{Mutation}: randomly altering genes of an individual to maintain diversity and encourage further exploration of the solution space.
-    \item \textbf{Termination}: a set of criterion to determine when reproduction for new generations should stop.
-\end{itemize}
+Furthermore, evolution maintains diversity within species to ensure robustness and the potential to introduce new strengths. This is done through mutations, where certain values of an individual's DNA sequence are changed, thereby altering their appearance or behavior. The mutations that turn out to be beneficial can help the species in their specific environments. An example of mutations can be found in different species of snakes. Both cobras and vipers evolved from the same ancestor. However, venom from cobras attack the target's nervous system while that from the viper attacks the cardiovascular system.
 
-The species in real life which benefit the most from evolution are those that are able to maintain diversity. With diversity, they can overcome external problems like diseases or natural disasters. Similarly, the genetic algorithm puts a strong emphasis on diversity, so it can explore a large solution space and escape falling into a local minimum. Diversity is achieved with several stages of randomness introduced in each generation, in selection, crossover and mutation.
+It is through the combination of the principle of ``survival of the fittest'' promoting diversity that biological evolution has produced so many species of organisms that are each so well adapted to their environments. In short, evolution is very well versed in solving a complex optimization problem.
+
+There exist certain computational problems that would take an unrealistic amount of computational resources to optimize by brute force, or where there lies no straightforward path to a solution. The genetic algorithm aims to mimic biological evolution as close as possible, seeing the potential for optimizing and solve such problems. It is composed of six main steps: initialization, fitness evaluation, selection, crossover, mutation, and finally termination. Each step of this process aims to mimic one part of what makes biological evolution so effective and robust.
+
+Initialization randomly produces the first generation of individuals. In the genetic algorithm, each individual represents one possible solution to the final problem. These are usually represented in the form of a data structure. Each individual data structure is composed of many smaller pieces of data, which are analogous to the genes of a biological organism. Together, the data determine the actions of the individual. The first generation is not expected to perform well, as all the data was generated from a random number generator.
+
+Fitness evaluation if the first step of the actual evolving or optimization process. Each individual has their fitness assessed based on a set of criteria. Fitness is represented by a single number, which can be determined by factors like performance, accuracy, or speed of the individual.
+
+As ``survival of the fittest'' suggests, the selection step picks the best individuals based on fitness to pass their genes onto the next generation. However, in order to maintain diversity, this step is not as simple as just sorting the individuals by fitness and picking the best ones for reproduction. Returning to the principle of diversity, there may be certain genes in the less fit individuals that can be beneficial in certain cases, so it is important that we do not entirely wipe them out. At the same time, those with higher fitness are more likely to contain more useful genes. Therefore, selection is randomized, with the probability of each individual being selected being weighted based on their fitness. This balances survival of the fittest and diversity.
+
+Crossover is analogous to reproduction. As with its biological counterpart, crossover can be either sexual or asexual. For sexual crossover, two parent individuals are needed. A child is produced by taking a subset of genes from the first parent, and a subset of genes from the other parent. For asexual crossover, only one parent is needed. A child is produced by swapping specific or a subset of genes' order. After crossover, the child individual has traits of both its parents, and its unique combination of genes can possibly explore further into the solution space.
+
+Mutation is what maintains diversity in the population. This introduces possible new genes into the population pool, or possibly new combinations of genes as well. Each individual has a random chance to be selected for mutation. In mutation, a random gene is chosen, and its value is altered. This is the last step of the optimization process.
+
+The steps from fitness evaluation to mutation are repeated over a predetermined number of generations, or until a stopping criterion is reached. This last step is called termination, which determines when the main loop is to end.
 
 \section{Evolutionary Decision Tree}
 
-An Evolutionary Decision Tree (EDT) uses a genetic algorithm to optimize decision trees. It aims to take the benefits from both vanilla decision trees and random forests, while adding a layer of optimization that increases its accuracy with training.
+An Evolutionary Decision Tree (EDT) uses a genetic algorithm to optimize decision trees. It aims to take the benefits from both decision tree classifiers and random forests, while adding the layer of the genetic algorithm that increases its accuracy with training. This algorithm is relatively undocumented and untested in the machine learning world. This paper aims to investigate how the different hyperparameters of an EDT play into its performance.
 
-Similar to vanilla decision trees, an EDT is able to output a singular or small number of low complexity trees. The first of the two advantages of this output is that it makes the tree comprehensible by humans and easy to follow along. But more importantly, it avoids overfitting of the training dataset, a major downfall of overly complicated and large decision trees.
+From decision trees, the EDT takes the ability to generate a singular, human interpretable tree as its final model. This can be useful in analysis, hyperparameter tweaking, or presentation. And from random forests, it introduces a layer of randomness. This allows the model to explore a larger solution space, and minimize the chance of fitting into a suboptimal solution.
 
-And similar to random forests, EDT's are able to harness random number generators to explore a larger solution space, thereby minimizing the chances of fitting into a local solution.
+% TODO: add diagram of solution space, local and global extrema
 
-\subsection{Evolutionary Process}
+The EDT will be implemented in the Python3 programming language.
 
-The steps in constructing an EDT are built closely on the steps of the genetic algorithm. Each step has been modified or tweaked to support operations with binary trees.
+\subsection{Initialization}
 
-\subsubsection{Initialization}
-
-The EDT population is composed of $n$ random generated decision trees, where $n$ is the population size. A randomly generated tree starts with a root node. Each of its children is then either a split node or a leaf node, according to a probability $p$. This step is repeated until a maximum desired depth is reached, or until all branches end in leaf nodes \cite{faik_2020}.
+The EDT population is composed of $n$ random generated decision trees, where $n$ is the population size. A randomly generated tree starts with a root node. Each of its children is then either a split node or a leaf node, determined by a probability $p$. This step is repeated until a desired depth is reached, or until all branches end in leaf nodes \cite{faik_2020}. Unlike a normal decision tree, there is no maximum depth with each individual in the EDT population. Rather, they will all be generated up to an \textit{optimal} depth. This is because the depth can exceed the optimal depth in crossover.
 
 \begin{itemize}
-    \item If a node is a split node, it is randomly assigned a feature and split value.
+    \item If a node is a split node, it is randomly assigned a feature and a respective split value.
     \item If a node is a leaf node, it is randomly assigned a label. Further restrictions are put in place to ensure that no branch in the tree can only lead to a single label.
 \end{itemize}
 
-\subsubsection{Fitness Evaluation}
+\subsection{Fitness Evaluation}
 
 The fitness for each individual in the population will be measured by the following formula \cite{faik_2020}:
 
-\[F_i = c_1 \cdot a_i + c_2 \cdot f(d_i)\]
+\[ F_i = c_1 \cdot a_i + c_2 \cdot -(d_i - d_\text{opt})^2 \]
 
 \begin{itemize}
     \item $F_i$ is the fitness of the $i$-th individual.
     \item $a_i$ is the accuracy of the $i$-th individual on the training data.
     \item $d_i$ is the depth of the $i$-th individual.
-    \item $f(x)$ is a predetermined function.
+    \item $d_\text{opt}$ is the optimal depth of the tree.
     \item $c_1, c_2$ are predetermined constants.
 \end{itemize}
 
-\subsubsection{Selection}
+The depth of each individual is extremely important. Trees that are smaller than the optimal depth may yield suboptimal results. Those that are bigger may be detrimental to performance and time complexity, especially if they reproduce and make even larger trees in future generations. Therefore, the function $-(d_i - d_\text{opt})^2$ has been specially chosen to encourage the optimal depth. It has a maximum when $d_i = d_\text{opt}$, and decreases on either side. Trees that are either too big or small are punished with a smaller fitness, and therefore have a lesser chance of being selected for the next generation.
+
+\subsection{Selection}
 
 The selection process will be a combination of two separate algorithms. The first of which will be tournament selection. A random set of $k$ individuals will be ranked by fitness, and the highest score will be able to move on to the crossover stage. This process is repeated twice, once for each parent in crossover. The random nature of this selection process ensures that diversity is maintained between generations, and that certain traits will not be entirely lost \cite{blickle_1997}.
 
-The second selection process will be elitism. This is where the fittest individuals from the previous generation will be moved directly on to the current generation, without crossover. This is to ensure that the traits of the best individuals are not lost through generations.
+The second selection process will be elitism. This is where the fittest individuals from the previous generation will be moved directly on to the current generation, without crossover. This is to ensure that the traits of the best individuals from the previous generation are not lost in selection or crossover.
 
 A total of $t$ individuals will be moved onto the next generation through elitism. The remaining $n - t$ spots will be filled through tournament selection and crossover.
 
-\subsubsection{Crossover}
+\subsection{Crossover}
 
-For crossover, two parent trees will produce two child trees in order to maintain the population count. The first child will originally be a direct copy of the first parent. A random node is then selected from each parent. The node from the first parent, and its entire subtree, will be replaced by the node from the second parent and its subtree.
+For crossover, two parent trees will produce two child trees in order to maintain the population count. The first child will originally be a direct copy of the first parent. A random node is then selected from each parent. The node from the first parent, and its entire subtree, will be replaced by the node from the second parent and its subtree. The same process will be repeated for the second child, except with the roles of the parents reversed.
 
 % TODO: add diagram for crossover
 
-\subsubsection{Mutation}
+\subsection{Mutation}
 
-If a tree is chosen for mutation, it will have one of its values traits randomly chosen and randomly altered. If the node selected is a split node, its feature and split value will be altered. Otherwise, if the node selected is a leaf node, it will have its label altered.
+If a tree is chosen for mutation, it will have one of its values traits randomly chosen and randomly altered. If the node selected is a split node, its feature and split value will be randomly altered. Otherwise, if the node selected is a leaf node, it will have its label randomly altered. Precautions will be put in place to make sure that each subtree can still lead to more than one label.
 
-\subsubsection{Termination}
+\subsection{Termination}
 
 There are two conditions for termination. The first of which is when the number of generations has reached a predetermined $n$. The other condition is when the average fitness does not improve by a predetermined threshold for $x$ generations. Which ever condition comes first is when the EDT will terminate.
 
 \section{Experimental Methodology}
 
-The goal of this investigation is to compare an EDT to other classification algorithms including a vanilla decision tree, random forest classifier, and a multilayer perceptron.
-
-\subsection{Independent Variables}
-
-Three datasets of varying sizes will be used.
-
-\begin{center}
-    \begin{tabular}{|c|c|c|c|}
-        \hline
-        Dataset & Features & Labels & Instances \\
-        \hline \hline
-        \href{https://archive-beta.ics.uci.edu/ml/datasets/breast+cancer}{Breast Cancer} & $10$ & $2$ & $286$ \\
-        \hline
-        \href{https://archive-beta.ics.uci.edu/ml/datasets/mushroom}{Mushroom} & $23$ & $2$ & $8124$ \\
-        \hline
-        \href{https://archive-beta.ics.uci.edu/ml/datasets/adult}{Adult} & $15$ & $2$ & $48842$ \\
-        \hline
-    \end{tabular}
-\end{center}
-
-\subsection{Dependent Variables}
-
-\section{Data Analysis}
-
-\section{Error Analysis}
-
-\section{Conclusion}
-
-\section{Appendix}
+% how to compare edt fairly with other algos when parameters are so different?
+% maybe investigate each hyperparameter of edt and see how it plays into its performance?
+% - e.g. how different crossover probabilities affect convergence and test accuracy
+% - or different selection splits
 
 \bibliographystyle{plain}
 \bibliography{refs}
