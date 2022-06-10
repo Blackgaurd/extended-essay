@@ -1,25 +1,31 @@
 File: essay.tex
 Encoding: ascii
-Words in text: 2234
-Words in headers: 25
-Words outside text (captions, etc.): 3
-Number of headers: 13
-Number of floats/tables/figures: 1
-Number of math inlines: 18
+Words in text: 2487
+Words in headers: 37
+Words outside text (captions, etc.): 19
+Number of headers: 19
+Number of floats/tables/figures: 4
+Number of math inlines: 20
 Number of math displayed: 1
 Subcounts:
   text+headers+captions (#headers/#floats/#inlines/#displayed)
   0+2+0 (1/0/0/0) _top_
   0+2+0 (1/0/0/0) Section: Background Information
   177+5+0 (1/0/0/0) Subsection: Machine Learning and its Applications
-  496+2+3 (1/1/0/0) Subsection: Decision Trees
-  776+2+0 (1/0/0/0) Subsection: Genetic Algorithm
-  138+3+0 (1/0/0/0) Section: Evolutionary Decision Tree
-  152+1+0 (1/0/3/0) Subsection: Initialization
-  143+2+0 (1/0/10/1) Subsection: Fitness Evaluation
+  536+2+6 (1/2/0/0) Subsection: Decision Trees
+  799+2+0 (1/0/0/0) Subsection: Genetic Algorithm
+  201+3+10 (1/1/0/0) Section: Genetic Decision Tree
+  156+1+0 (1/0/3/0) Subsection: Initialization
+  179+2+0 (1/0/12/1) Subsection: Fitness Evaluation
   151+1+0 (1/0/3/0) Subsection: Selection
-  80+1+0 (1/0/0/0) Subsection: Crossover
-  73+1+0 (1/0/0/0) Subsection: Mutation
+  80+1+3 (1/1/0/0) Subsection: Crossover
+  72+1+0 (1/0/0/0) Subsection: Mutation
   48+1+0 (1/0/2/0) Subsection: Termination
-  0+2+0 (1/0/0/0) Section: Experimental Methodology
+  88+2+0 (1/0/0/0) Section: Experimental Analysis
+  0+2+0 (1/0/0/0) Subsection: Population Size
+  0+2+0 (1/0/0/0) Subsection: Crossover Probability
+  0+2+0 (1/0/0/0) Subsection: Selection Constants
+  0+2+0 (1/0/0/0) Subsection: Selection Methods
+  0+2+0 (1/0/0/0) Subsection: Mutation Probability
+  0+2+0 (1/0/0/0) Subsection: Generation Count
 
