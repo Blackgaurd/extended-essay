@@ -1,11 +1,11 @@
 File: essay.tex
 Encoding: ascii
-Words in text: 2487
-Words in headers: 37
-Words outside text (captions, etc.): 19
-Number of headers: 19
-Number of floats/tables/figures: 4
-Number of math inlines: 20
+Words in text: 3724
+Words in headers: 45
+Words outside text (captions, etc.): 90
+Number of headers: 23
+Number of floats/tables/figures: 12
+Number of math inlines: 52
 Number of math displayed: 1
 Subcounts:
   text+headers+captions (#headers/#floats/#inlines/#displayed)
@@ -13,19 +13,23 @@ Subcounts:
   0+2+0 (1/0/0/0) Section: Background Information
   177+5+0 (1/0/0/0) Subsection: Machine Learning and its Applications
   536+2+6 (1/2/0/0) Subsection: Decision Trees
-  799+2+0 (1/0/0/0) Subsection: Genetic Algorithm
+  800+2+0 (1/0/0/0) Subsection: Genetic Algorithm
   201+3+10 (1/1/0/0) Section: Genetic Decision Tree
   156+1+0 (1/0/3/0) Subsection: Initialization
-  179+2+0 (1/0/12/1) Subsection: Fitness Evaluation
+  197+2+0 (1/0/12/1) Subsection: Fitness Evaluation
   151+1+0 (1/0/3/0) Subsection: Selection
   80+1+3 (1/1/0/0) Subsection: Crossover
   72+1+0 (1/0/0/0) Subsection: Mutation
   48+1+0 (1/0/2/0) Subsection: Termination
-  88+2+0 (1/0/0/0) Section: Experimental Analysis
-  0+2+0 (1/0/0/0) Subsection: Population Size
-  0+2+0 (1/0/0/0) Subsection: Crossover Probability
-  0+2+0 (1/0/0/0) Subsection: Selection Constants
-  0+2+0 (1/0/0/0) Subsection: Selection Methods
-  0+2+0 (1/0/0/0) Subsection: Mutation Probability
-  0+2+0 (1/0/0/0) Subsection: Generation Count
+  21+2+0 (1/0/0/0) Subsection: Time Complexity
+  173+2+0 (1/0/2/0) Section: Mushroom Dataset
+  151+2+0 (1/0/2/0) Section: Hyperparameter Optimization
+  65+2+6 (1/1/1/0) Subsection: Population Size
+  47+2+7 (1/1/0/0) Subsection: Optimal Depth
+  72+2+7 (1/1/7/0) Subsection: Fitness Constants
+  59+2+7 (1/1/1/0) Subsection: Selection Distribution
+  62+2+6 (1/1/1/0) Subsection: Mutation Probability
+  290+1+38 (1/3/16/0) Section: Results
+  190+4+0 (1/0/2/0) Subsection: Comparison With Other Algorithms
+  176+1+0 (1/0/0/0) Section: Conclusion
 

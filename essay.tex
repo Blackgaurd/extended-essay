@@ -1,10 +1,3 @@
-% research question:
-% how does each hyperparamter play a part in evolutionary decision tree performance?
-% ^ maybe too abstract
-% how does an gdt compare with other data classification algorithms of similar nature
-% more broad like:
-%   to what extent can a genetic algorithm be used to optimize decision trees for data classification
-
 % TODO: Change font to helvetica
 % double spacing
 
@@ -21,6 +14,7 @@
 \usepackage{graphicx} % add images
 %\usepackage{wrapfig} % position images
 \usepackage{float} % position images pt.2
+\usepackage{subcaption} % subfigures
 %\usepackage[makeroom]{cancel} % cross out text
 %\usepackage[version=4]{mhchem} % chemical equations
 %\usepackage{multicol} % multiple columns
@@ -37,8 +31,7 @@
     urlcolor=black
 }
 
-\renewcommand{\baselinestretch}{1.5} % line spacing
-\newcommand{\fline}{\par\noindent\rule{\textwidth}{0.1pt}} % horizontal line (wide)
+\renewcommand{\baselinestretch}{1.15} % line spacing
 
 \title{EE TITLE}
 \author{Bryan Deng}
@@ -80,7 +73,7 @@ Decision trees use the structure of binary trees to classify data. Non-leaf node
 
 \begin{figure}[H]
     \centering
-    \fbox{\includegraphics[scale=0.7]{figs/decision_tree.png}}
+    \fbox{\includegraphics[scale=0.6]{figs/decision_tree.png}}
     \caption{Decision Tree Diagram}
     \label{fig:decisiontree}
 \end{figure}
@@ -99,7 +92,7 @@ It is through the combination of the principle of ``survival of the fittest'' pr
 
 There exist certain computational problems that would take an unrealistic amount of computational resources to optimize by brute force, or where there lies no straightforward path to a solution. The genetic algorithm aims to mimic biological evolution as close as possible, seeing the potential for optimizing and solve such problems. It is composed of six main steps: initialization, fitness evaluation, selection, crossover, mutation, and finally termination. Each step of this process aims to mimic one part of what makes biological evolution so effective and robust.
 
-Initialization randomly produces the first generation of individuals. In the genetic algorithm, each individual represents one possible solution to the final problem. These are usually represented in the form of a data structure. Each individual data structure is composed of many smaller pieces of data, which are analogous to the genes of a biological organism. Together, the data determine the actions of the individual. The first generation is not expected to perform well, as all the data was generated from a random number generator.
+Initialization randomly produces the first generation of individuals. In the genetic algorithm, each individual represents one possible solution to the final problem. These are usually represented in the form of a data structure. Each individual data structure is composed of many smaller pieces of data, which are analogous to the genes of a biological organism. Together, the data determine the actions of the individual. The first generation is not expected to perform well, as all the data was generated from a random number generator (RNG).
 
 Fitness evaluation if the first step of the actual evolving or optimization process. Each individual has their fitness assessed based on a set of criteria. Fitness is represented by a single number, which can be determined by factors like performance, accuracy, or speed of the individual. The fitness value given to each individual is to encourage better performing genes into being passed onto the next generation, and vice versa.
 
@@ -148,7 +141,7 @@ The fitness for each individual in the population will be measured by the follow
 
 The depth of each individual is extremely important. Trees that are smaller than the optimal depth may yield suboptimal results. Those that are bigger may be detrimental to performance and time complexity, especially if they reproduce and make even larger trees in future generations. Therefore, the function $(d_i - d_\text{opt})^2$ has been specially chosen to encourage the optimal depth. It is an upwards opening parabola with a minimum when $d_i = d_\text{opt}$, which increases on either side. A value is subtracted from an individual's fitness depending on its depth. Trees that are either too big or small are punished with a decrease in fitness, and therefore have a lesser chance of being selected for the next generation.
 
-The values of $c_1$ and $c_2$ are hyperparameters which can be adjusted according to performance of the algorithm in testing.
+The values of $c_1$ and $c_2$ are hyperparameters which can be adjusted according to performance of the algorithm in testing. Together they make up a weighted mean of how much accuracy and tree depth affect respectively the fitness.
 
 \subsection{Selection}
 
@@ -177,22 +170,170 @@ If a tree is chosen for mutation, it will have one of its value's traits randoml
 
 There are two conditions for termination. The first of which is when the number of generations has reached a predetermined $n$. The other condition is when the average fitness does not improve by a predetermined threshold for $x$ generations. Which ever condition comes first is when the GDT will terminate.
 
-\section{Experimental Analysis}
+\subsection{Time Complexity}
 
-The performance of the GDT will be evaluated on three main factors: training speed, training convergence, and testing accuracy. The hyperparameters of the GDT will be altered in order to see what effect each one has on the performance factors of the algorithm. Each test with its specific parameters will be run three times. Each iteration will have a different but controlled random seed, in order to minimize the chances of a fluke.
+The time complexity of a machine learning algorithm gives a prediction into how fast or slow it will run during training.
 
-%! maybe run in ipython with jupyter
-All the tests will be run on an AMD Ryzen 7 4700U and CPython 3.8.10.
+\section{Mushroom Dataset}
+
+The dataset that will be used to train the GDT both in hyperparameter optimization and the final results will be the \href{https://archive-beta.ics.uci.edu/ml/datasets/mushroom}{Mushroom Dataset} from UC Irvine \cite{misc_mushroom_73}. It contains data about the different physical features of thousands of wild mushrooms. Each instance in this dataset consists of $22$ different features to classify a mushroom as either poisonous or edible. In total, there are $8124$ instances. Any missing data from the dataset is filled with the most common value from its respective feature. Some examples of the features and its respective values are described below:
+
+\begin{center}
+    \begin{tabular}{|c|c|}
+        \hline
+        Feature & Possible Values \\
+        \hline \hline
+        cap shape & bell, conical, convex, flat, knobbed, sunken \\
+        \hline
+        bruises & yes, no \\
+        \hline
+        habitat & grasses, leaves, meadows, paths, urban, waste, woods \\
+        \hline
+        color & brown, buff, cinnamon, gray, green, pink, purple, red, white, yellow \\
+        \hline
+        \dots & \dots \\
+        \hline
+    \end{tabular}
+\end{center}
+
+This dataset does not come with a predetermined testing subset, so that will have to be done manually. Furthermore, it may be useful to generate a third subset of the data, the validation dataset. Validation is used to gauge the reliability of the model and possible overfitting. For example, if the training accuracy is much higher than the validation accuracy, this means that the model may have ``memorized'' the patterns in the training set, but suffers in applying them to other data.
+
+\section{Hyperparameter Optimization}
+
+Hyperparameters are the variables that initiate the GDT. They play a major role in determining how well any machine learning algorithm will perform, so it is crucial to determine an optimal combination of hyperparameters. In order to do this for the GDT algorithm, several test runs have been performed. In each test, the independent variable is the hyperparameter in question, while the dependent variables are training speed, test accuracy and how fast the model converges in terms of accuracy. The other hyperparameters and variables are all controlled to make sure that only the independent variable affects performance. Furthermore, each test was run $3$ times, each with a different random number generator seed to minimize the chances of a fluke in an individual run. The error bars in the figures represent the standard deviation of the results.
+
+The dataset will be randomly split into training and testing subsets according to a $3:1$ ratio, respectively.
 
 \subsection{Population Size}
 
+The independent variable in this test is the population size of each generation in the algorithm. As can be determined in the graphs below, a population size of $400$ balances training speed with testing accuracy the best. This is likely due to the same reason why a random forest benefits from a larger population. More individuals can more closely approximate the label and have fewer discrepancies.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[scale=0.6]{figs/analysis/population_size.png}}
+    \caption{How population size affects GDT performance.}
+\end{figure}
+
+\subsection{Optimal Depth}
+
+The independent variable in this test is the optimal depth of each decision tree. The depths follow a generally positive trend in both training time and testing accuracy. A deeper decision tree means more space to include split nodes, which can be more specific in classifying data.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[scale=0.6]{figs/analysis/optimal_depth.png}}
+    \caption{How optimal tree depth affects GDT performance.}
+\end{figure}
+
 \subsection{Fitness Constants}
+
+The independent variable in this test is the value of $c_1$ in the fitness equation. The value of $c_2$ will be equal to $1 - c_1$. The highest testing accuracy was achieved with $c_1 = 0.7$ and $c_2 = 0.3$ with little cost in training time. It should only be among the best performing individuals in terms of accuracy where depth is used as a deciding factor in selection. A higher $c_1$ value puts a greater weight on accuracy, which promotes this selection pattern.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[scale=0.6]{figs/analysis/fitness_constants.png}}
+    \caption{How the value of $c_1$ affects GDT performance.}
+\end{figure}
 
 \subsection{Selection Distribution}
 
+The independent variable in this test is the distribution of selection algorithms, between tournament selection and elitism. The ratio of $3:1$ for tournament selection to elitism yielded the fastest training time, while being similar in testing accuracy to the other values. As previously mentioned, tournament selection promotes greater diversity in the population and more opportunities to generate unique solution combinations.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[scale=0.6]{figs/analysis/selection_distribution.png}}
+    \caption{How selection algorithm distribution affects GDT performance.}
+\end{figure}
+
 \subsection{Mutation Probability}
 
-\subsection{Optimal Depth}
+The independent variable in this test is the probability for an individual in the population to be selected for mutation. A mutation probability of $0.25$ converges the fastest, while having a relatively low training time and high testing accuracy. While mutations are important, too high a chance of mutation may replace optimized combinations in individuals with too many random values, thereby harming accuracy.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[scale=0.6]{figs/analysis/mutation_probability.png}}
+    \caption{How mutation probability affects GDT performance.}
+\end{figure}
+
+\section{Results}
+
+The hyperparameters for the final model are a combination of the best values from each of the individual tests in the above sections. The algorithm was run at with a population size of $400$, a $4:1$ ratio of tournament selection to elitism with $k=10$ in tournament selection, mutation probability of $0.1$, optimal depth of $5$, and values of $0.8$ and $0.2$ for $c_1$ and $c_2$ in fitness evaluation, respectively. The dataset is randomly split into the training, testing, and validation subsets according to a $8:1:1$ ratio, respectively. The results are graphed:
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[scale=0.6]{analysis/final/accuracy.png}}
+    \caption{Average and maximum accuracy of individuals in the population.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[scale=0.6]{analysis/final/fitness.png}}
+    \caption{Average and maximum fitness of individuals in the population.}
+\end{figure}
+
+In each of these graphs, it can be seen that accuracy, fitness and validation accuracy all converge over time. Throughout the training, the training accuracy mostly stays in line with the validation accuracy, suggesting that the model is not overfitting with the current hyperparameters. Furthermore, here are how the fittest decision trees look like at generations $25$, $50$, $75$ and $100$. Keep in mind that this is one of the main benefits of the GDT, being able to output a single human interpretable decision tree. Note that the feature values have been mapped to numbers for the algorithm to understand. The complete map of the categorical feature values and numbers can be found in the appendix. If the inequality holds true for the node, the instance proceeds to the left child. Otherwise, it proceeds to the right child.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \fbox{\includegraphics[width=0.9\linewidth]{analysis/final/generation_25.png}}
+        \caption{Fittest tree at generation 25.}
+    \end{subfigure}
+
+    \medskip
+
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \fbox{\includegraphics[width=0.9\linewidth]{analysis/final/generation_50.png}}
+        \caption{Fittest tree at generation 50.}
+    \end{subfigure}
+
+    \medskip
+
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \fbox{\includegraphics[width=0.9\linewidth]{analysis/final/generation_75.png}}
+        \caption{Fittest tree at generation 75.}
+    \end{subfigure}
+
+    \medskip
+
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \fbox{\includegraphics[width=0.9\linewidth]{analysis/final/generation_100.png}}
+        \caption{Fittest tree at generation 100.}
+    \end{subfigure}
+\end{figure}
+
+In the earlier generations, the decision tree is not really balanced. For example at the $25$th generation, the left side of the root has much more nodes than the right side. This may be detrimental to performance as the trees do not fully utilize all the space possible for classification. On the other hand, the $100$th generation has a much more balanced decision tree with many more nodes, which may explain its higher training accuracy.
+
+\subsection{Comparison With Other Algorithms}
+
+This experiment has effectively proven that the genetic algorithm is a viable way in constructing and optimizing decision trees for data classification. But how does it stand up against other decision tree algorithms? The GDT was put up against three other decision tree algorithms, namely a vanilla decision tree classifier, a random forest classifier, and a gradient boosting decision tree. Each algorithm was set to have a maximum depth of $5$ to match that of the GDT. They were also trained on the same subset of the Mushroom Dataset. Here are the results, ranked by test accuracy:
+
+\begin{center}
+    \begin{tabular}{|c|c|c|}
+        \hline
+        Algorithm & Test Accuracy & Training Time (s) \\
+        \hline \hline
+        Gradient Boosting & 100\% & 0.1234 \\
+        \hline
+        Random Forest & 99.75\% & 0.6847 \\
+        \hline
+        Decision Tree & 99.26\% & 0.004251 \\
+        \hline
+        GDT & 96.37\% & 189.5 \\
+        \hline
+    \end{tabular}
+\end{center}
+
+Not only did the GDT have the lowest testing accuracy, it also took the longest time to train, by over $1000$ times compared to the next slowest algorithm. Granted the Light GBM \cite{ke2017lightgbm} implementation of gradient boosting was written in C++, but the scikit-learn implementations of the decision tree and random forest are both pure python \cite{scikit-learn}. The GDT relies much more on randomness and much less on mathematics. Therefore, although the GDT algorithm works in fitting a model to a dataset, it is far from the most effective or the most efficient one compared to alternatives.
+
+\section{Conclusion}
+
+Although a genetic algorithm works in decision tree construction, it relies too heavily on random nature rather than theory and a mathematical backing. Furthermore, the genetic algorithm has many hyperparameters which can all drastically affect the final performance of the GDT. Therefore, it takes a lot of time to determine an optimal combination of hyperparameters for an optimally performant GDT. Although there exists approaches in automatic hyperparameter tuning using another genetic algorithm, this is far from practical for the GDT. Each run of the GDT takes around two minutes, and to add a layer of yet another genetic algorithm as an overhead would exponentially increase the time complexity.
+
+Genetic algorithms are extremely versatile and useful algorithms that can be used to solve abstract optimization problems. But in a problem like decision tree construction where there exist other approaches that are more heavily backed by theory and mathematics, a random nature solution may not be the most efficient. In short, GA's can solve problems where no direct or analytical approach exists, but prove to be inefficient otherwise.
 
 \bibliographystyle{plain}
 \bibliography{refs}
