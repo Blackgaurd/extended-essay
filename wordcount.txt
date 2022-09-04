@@ -1,15 +1,16 @@
 File: essay.tex
 Encoding: ascii
-Words in text: 3724
-Words in headers: 45
+Words in text: 3843
+Words in headers: 66
 Words outside text (captions, etc.): 90
-Number of headers: 23
-Number of floats/tables/figures: 12
+Number of headers: 24
+Number of floats/tables/figures: 15
 Number of math inlines: 52
 Number of math displayed: 1
 Subcounts:
   text+headers+captions (#headers/#floats/#inlines/#displayed)
-  0+2+0 (1/0/0/0) _top_
+  0+22+0 (1/0/0/0) _top_
+  96+1+0 (1/0/0/0) Section: Introduction
   0+2+0 (1/0/0/0) Section: Background Information
   177+5+0 (1/0/0/0) Subsection: Machine Learning and its Applications
   536+2+6 (1/2/0/0) Subsection: Decision Trees
@@ -29,7 +30,7 @@ Subcounts:
   72+2+7 (1/1/7/0) Subsection: Fitness Constants
   59+2+7 (1/1/1/0) Subsection: Selection Distribution
   62+2+6 (1/1/1/0) Subsection: Mutation Probability
-  290+1+38 (1/3/16/0) Section: Results
+  312+1+38 (1/6/16/0) Section: Results
   190+4+0 (1/0/2/0) Subsection: Comparison With Other Algorithms
-  176+1+0 (1/0/0/0) Section: Conclusion
+  177+1+0 (1/0/0/0) Section: Conclusion
 

@@ -33,9 +33,16 @@
 
 \renewcommand{\baselinestretch}{1.15} % line spacing
 
-\title{EE TITLE}
-\author{Bryan Deng}
-\date{}
+\title{
+    Mimicking Evolution for Decision Tree Optimization \\ [6pt]
+    \large To what extent can the genetic algorithm be applied in \\
+    constructing decision trees for data classification?
+}
+\author{
+    Subject: Computer Science \\
+    Words: 3843
+}
+\date{} % render no date
 
 \begin{document}
 
@@ -43,6 +50,10 @@
 \newpage
 \tableofcontents
 \newpage
+
+\section{Introduction}
+
+As machine learning applications become more and more integrated into all the aspects of our everyday lives, new methods for developing these artificial intelligence models are constantly being discovered, with the goals of improving accuracy, speed, and ease of use. One of the best examples of optimization in our world has to be the miracle of biological evolution, of how nature was able to turn simple single-cell organisms into the complex multicellular plants and animals we have today. This subsequently leads to the question of whether or not we can mimic evolution in training artificial intelligence.
 
 \section{Background Information}
 
@@ -80,7 +91,7 @@ Decision trees use the structure of binary trees to classify data. Non-leaf node
 
 \hyperref[fig:decisiontree]{Figure 1} shows a simple decision tree to predict whether it will rain based on other weather conditions. Given a cloudy day with no sun, the model will predict that it will rain, as outlined by the red lines on the diagram.
 
-The standard way to generate a decision tree is to use a top-down greedy recursive algorithm based on how many values are incorrectly classified, or gini-impurity. At each step of the tree, the split value is determined by testing out every single value of every single feature, and seeing which one yields the lowest gini-impurity. The left child of the current node is then built using the data that falls under the split value, and the right child is built using the remaining data. This process continues until the gini-impurity is less than a preset value, or until a certain depth is reached. Certain algorithms for decision tree generation also balance the binary tree for reduced time complexity in testing \cite{dt_skl_doc}.
+The standard way to generate a decision tree is to use a top-down greedy recursive algorithm based on how many values are incorrectly classified, or gini-impurity. At each step of the tree, the split value is determined by testing out every single value of every single feature, and seeing which one yields the lowest gini-impurity. The left child of the current node is then built using the data that falls under the split value, and the right child is built using the remaining data. This process continues until the gini-impurity is less than a preset value, or until a certain depth is reached. Certain algorithms for decision tree generation also balance the binary tree for reduced time complexity in testing \cite{scikit-learn}.
 
 \subsection{Genetic Algorithm}
 
@@ -274,38 +285,29 @@ In each of these graphs, it can be seen that accuracy, fitness and validation ac
 
 \begin{figure}[H]
     \centering
-    \begin{subfigure}[t]{\textwidth}
-        \centering
-        \fbox{\includegraphics[width=0.9\linewidth]{analysis/final/generation_25.png}}
-        \caption{Fittest tree at generation 25.}
-    \end{subfigure}
-
-    \medskip
-
-    \begin{subfigure}[t]{\textwidth}
-        \centering
-        \fbox{\includegraphics[width=0.9\linewidth]{analysis/final/generation_50.png}}
-        \caption{Fittest tree at generation 50.}
-    \end{subfigure}
-
-    \medskip
-
-    \begin{subfigure}[t]{\textwidth}
-        \centering
-        \fbox{\includegraphics[width=0.9\linewidth]{analysis/final/generation_75.png}}
-        \caption{Fittest tree at generation 75.}
-    \end{subfigure}
-
-    \medskip
-
-    \begin{subfigure}[t]{\textwidth}
-        \centering
-        \fbox{\includegraphics[width=0.9\linewidth]{analysis/final/generation_100.png}}
-        \caption{Fittest tree at generation 100.}
-    \end{subfigure}
+    \fbox{\includegraphics[width=0.9\linewidth]{analysis/final/generation_25.png}}
+    \caption{Fittest tree at generation 25.}
 \end{figure}
 
-In the earlier generations, the decision tree is not really balanced. For example at the $25$th generation, the left side of the root has much more nodes than the right side. This may be detrimental to performance as the trees do not fully utilize all the space possible for classification. On the other hand, the $100$th generation has a much more balanced decision tree with many more nodes, which may explain its higher training accuracy.
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=0.9\linewidth]{analysis/final/generation_50.png}}
+    \caption{Fittest tree at generation 50.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=0.9\linewidth]{analysis/final/generation_75.png}}
+    \caption{Fittest tree at generation 75.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=0.9\linewidth]{analysis/final/generation_100.png}}
+    \caption{Fittest tree at generation 100.}
+\end{figure}
+
+In the earlier generations, the decision tree is not really balanced. For example at the $25$th generation, the left side of the root has much more nodes than the right side. This may be detrimental to performance as the trees do not fully utilize all the space possible for classification. As the generations progress, the decision trees begin to use more and more of the possible node space, likely because those individuals score higher fitness. For example $100$th generation has a much more balanced decision tree with many more nodes, which may explain its higher training accuracy.
 
 \subsection{Comparison With Other Algorithms}
 
@@ -327,13 +329,13 @@ This experiment has effectively proven that the genetic algorithm is a viable wa
     \end{tabular}
 \end{center}
 
-Not only did the GDT have the lowest testing accuracy, it also took the longest time to train, by over $1000$ times compared to the next slowest algorithm. Granted the Light GBM \cite{ke2017lightgbm} implementation of gradient boosting was written in C++, but the scikit-learn implementations of the decision tree and random forest are both pure python \cite{scikit-learn}. The GDT relies much more on randomness and much less on mathematics. Therefore, although the GDT algorithm works in fitting a model to a dataset, it is far from the most effective or the most efficient one compared to alternatives.
+Not only did the GDT have the lowest testing accuracy, it also took the longest time to train, by over $1000$ times compared to the next slowest algorithm. Granted the Light GBM \cite{ke2017lightgbm} implementation of gradient boosting was written in C++, but the scikit-learn implementations of the decision tree and random forest are both pure python \cite{scikit-learn}. The GDT relies much more on randomness and much less on theory. Therefore, although the GDT algorithm works in fitting a model to a dataset, it is far from the most effective or the most efficient one compared to alternatives.
 
 \section{Conclusion}
 
 Although a genetic algorithm works in decision tree construction, it relies too heavily on random nature rather than theory and a mathematical backing. Furthermore, the genetic algorithm has many hyperparameters which can all drastically affect the final performance of the GDT. Therefore, it takes a lot of time to determine an optimal combination of hyperparameters for an optimally performant GDT. Although there exists approaches in automatic hyperparameter tuning using another genetic algorithm, this is far from practical for the GDT. Each run of the GDT takes around two minutes, and to add a layer of yet another genetic algorithm as an overhead would exponentially increase the time complexity.
 
-Genetic algorithms are extremely versatile and useful algorithms that can be used to solve abstract optimization problems. But in a problem like decision tree construction where there exist other approaches that are more heavily backed by theory and mathematics, a random nature solution may not be the most efficient. In short, GA's can solve problems where no direct or analytical approach exists, but prove to be inefficient otherwise.
+Genetic algorithms are extremely versatile and useful algorithms that can be used to solve abstract optimization problems. But in a problem like decision tree construction where there exist other approaches that are more heavily backed by theorems and mathematics, a solution rooted in randomness may not be the most efficient. In short, GA's can solve problems where no direct or analytical approach exists, but prove to be inefficient otherwise.
 
 \bibliographystyle{plain}
 \bibliography{refs}
