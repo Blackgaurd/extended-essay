@@ -1,9 +1,9 @@
 File: essay.tex
 Encoding: ascii
-Words in text: 3909
-Words in headers: 69
+Words in text: 3888
+Words in headers: 67
 Words outside text (captions, etc.): 90
-Number of headers: 25
+Number of headers: 24
 Number of floats/tables/figures: 15
 Number of math inlines: 52
 Number of math displayed: 1
@@ -22,7 +22,6 @@ Subcounts:
   80+1+3 (1/1/0/0) Subsection: Crossover
   72+1+0 (1/0/0/0) Subsection: Mutation
   48+1+0 (1/0/2/0) Subsection: Termination
-  21+2+0 (1/0/0/0) Subsection: Time Complexity
   173+2+0 (1/0/2/0) Section: Mushroom Dataset
   177+2+0 (1/0/2/0) Section: Hyperparameter Optimization
   65+2+6 (1/1/1/0) Subsection: Population Size
