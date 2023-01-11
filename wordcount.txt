@@ -1,19 +1,19 @@
 File: essay.tex
 Encoding: ascii
-Words in text: 3888
-Words in headers: 67
+Words in text: 3892
+Words in headers: 69
 Words outside text (captions, etc.): 90
 Number of headers: 24
 Number of floats/tables/figures: 15
-Number of math inlines: 52
+Number of math inlines: 51
 Number of math displayed: 1
 Subcounts:
   text+headers+captions (#headers/#floats/#inlines/#displayed)
-  0+22+0 (1/0/0/0) _top_
+  0+24+0 (1/0/0/0) _top_
   96+1+0 (1/0/0/0) Section: Introduction
   0+2+0 (1/0/0/0) Section: Background Information
   177+5+0 (1/0/0/0) Subsection: Machine Learning and its Applications
-  554+2+6 (1/2/0/0) Subsection: Decision Trees
+  560+2+6 (1/2/0/0) Subsection: Decision Trees
   809+2+0 (1/0/0/0) Subsection: Genetic Algorithm
   196+3+10 (1/1/0/0) Section: Genetic Decision Tree
   157+1+0 (1/0/3/0) Subsection: Initialization
@@ -22,8 +22,8 @@ Subcounts:
   80+1+3 (1/1/0/0) Subsection: Crossover
   72+1+0 (1/0/0/0) Subsection: Mutation
   48+1+0 (1/0/2/0) Subsection: Termination
-  173+2+0 (1/0/2/0) Section: Mushroom Dataset
-  177+2+0 (1/0/2/0) Section: Hyperparameter Optimization
+  172+2+0 (1/0/2/0) Section: Mushroom Dataset
+  178+2+0 (1/0/1/0) Section: Hyperparameter Optimization
   65+2+6 (1/1/1/0) Subsection: Population Size
   47+2+7 (1/1/0/0) Subsection: Optimal Depth
   72+2+7 (1/1/7/0) Subsection: Fitness Constants
@@ -31,6 +31,6 @@ Subcounts:
   62+2+6 (1/1/1/0) Subsection: Mutation Probability
   0+1+0 (1/0/0/0) Section: Results
   312+3+38 (1/6/16/0) Subsection: Running the Algorithm
-  190+4+0 (1/0/2/0) Subsection: Comparison With Other Algorithms
+  188+4+0 (1/0/2/0) Subsection: Comparison With Other Algorithms
   177+1+0 (1/0/0/0) Section: Conclusion
 
