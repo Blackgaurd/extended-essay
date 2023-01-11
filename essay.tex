@@ -1,9 +1,10 @@
 % latex template
 \documentclass[12pt]{article}
-\usepackage{times}
-\usepackage[utf8]{inputenc}
-\usepackage[english]{babel}
-\usepackage[margin=1in]{geometry}
+\usepackage[utf8]{inputenc} % text encoding
+\usepackage[english]{babel} % language
+\usepackage{times} % times new roman font
+%\usepackage[document]{ragged2e} % left justification
+\usepackage[margin=1in]{geometry} % margins
 \usepackage{caption} % figure captioning
 \usepackage{amsmath} % equation tools
 \usepackage{amssymb} % math symbols
@@ -33,6 +34,7 @@
 }
 
 \renewcommand{\baselinestretch}{2} % line spacing
+\addbibresource{citations.bib}
 
 \title{
     Mimicking Evolution for Decision Tree Optimization \\ [6pt]
@@ -45,12 +47,12 @@
 }
 \date{} % render no date
 
-\addbibresource{citations.bib}
-
 \begin{document}
 
 \maketitle
+\thispagestyle{empty} % no page number for first page
 \newpage
+\pagenumbering{arabic} % reset page number counter
 \tableofcontents
 \newpage
 
@@ -339,6 +341,6 @@ Although a genetic algorithm works in decision tree construction, it relies too 
 Genetic algorithms are extremely versatile and useful algorithms that can be used to solve abstract optimization problems. But in a problem like decision tree construction where there exist other approaches that are more heavily backed by theorems and mathematics, a solution rooted in randomness may not be the most efficient. In short, GA's can solve problems where no direct or analytical approach exists, but prove to be inefficient otherwise.
 
 \newpage
-\printbibliography
+\printbibliography[heading=bibintoc] % add works cited to toc
 
 \end{document}
